@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+.next-dev/
+out/
+
+# env (local secrets stay out of git)
+.env.local
+.env*.local
+
+# drizzle
+drizzle/*.snap
+
+# system
+.DS_Store

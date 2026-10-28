@@ -1,0 +1,90 @@
+:root {
+  /* Brand */
+  --gv-ink: #071617;
+  --gv-ink-soft: #0f2a2b;
+  --gv-teal: #134e4a;
+  --gv-teal-bright: #1f7a72;
+  --gv-signal: #d4f34a;
+  --gv-signal-deep: #b6d62e;
+  --gv-mist: #eef4f2;
+  --gv-mist-2: #dfeae6;
+  --gv-cloud: #f7faf9;
+  --gv-stone: #5d6f6d;
+  --gv-line: rgba(7, 22, 23, 0.12);
+  --gv-line-strong: rgba(7, 22, 23, 0.22);
+
+  /* Semantic (light) */
+  --background: var(--gv-cloud);
+  --foreground: var(--gv-ink);
+  --card: #ffffff;
+  --card-foreground: var(--gv-ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--gv-ink);
+  --primary: var(--gv-ink);
+  --primary-foreground: var(--gv-signal);
+  --secondary: var(--gv-mist);
+  --secondary-foreground: var(--gv-ink);
+  --muted: var(--gv-mist-2);
+  --muted-foreground: var(--gv-stone);
+  --accent: var(--gv-signal);
+  --accent-foreground: var(--gv-ink);
+  /* Inline links / text CTAs — not --primary (ink fill for buttons). */
+  --link: var(--gv-teal);
+  --destructive: #c2410c;
+  --destructive-foreground: #fff7ed;
+  --border: var(--gv-line);
+  --input: var(--gv-line-strong);
+  --ring: var(--gv-teal-bright);
+  --radius: 0.75rem;
+
+  /* Atmosphere */
+  --gv-hero-glow: rgba(212, 243, 74, 0.28);
+  --gv-surface-glow: rgba(31, 122, 114, 0.14);
+
+  /* Fluid layout — consumed by app shells, not per-page styles */
+  --app-gutter: clamp(0.85rem, 0.55rem + 1.4vw, 2rem);
+  --app-page-max: min(80rem, 100%);
+  --app-body-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+  --app-muted-size: clamp(0.8125rem, 0.78rem + 0.15vw, 0.875rem);
+  --app-title-size: clamp(1.35rem, 1.15rem + 0.9vw, 1.875rem);
+}
+
+.dark {
+  --gv-ink: #f4faf8;
+  --gv-ink-soft: #d7e7e3;
+  --gv-teal: #7bc4bc;
+  --gv-teal-bright: #9fd8d1;
+  --gv-signal: #d4f34a;
+  --gv-signal-deep: #e7ff7a;
+  --gv-mist: #102222;
+  --gv-mist-2: #163030;
+  --gv-cloud: #071011;
+  --gv-stone: #9aadaa;
+  --gv-line: rgba(244, 250, 248, 0.12);
+  --gv-line-strong: rgba(244, 250, 248, 0.22);
+
+  --background: #071011;
+  --foreground: #f4faf8;
+  --card: #0d1a1a;
+  --card-foreground: #f4faf8;
+  --popover: #0d1a1a;
+  --popover-foreground: #f4faf8;
+  /* Match light: ink fill + signal text. Absolute ink — --gv-ink is remapped in .dark. */
+  --primary: #071617;
+  --primary-foreground: var(--gv-signal);
+  --secondary: #102222;
+  --secondary-foreground: #f4faf8;
+  --muted: #163030;
+  --muted-foreground: #9aadaa;
+  --accent: var(--gv-signal);
+  --accent-foreground: #071617;
+  --link: var(--gv-signal);
+  --destructive: #ea580c;
+  --destructive-foreground: #fff7ed;
+  --border: rgba(244, 250, 248, 0.12);
+  --input: rgba(244, 250, 248, 0.22);
+  --ring: #9fd8d1;
+
+  --gv-hero-glow: rgba(212, 243, 74, 0.16);
+  --gv-surface-glow: rgba(127, 196, 188, 0.1);
+}
