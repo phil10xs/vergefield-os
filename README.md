@@ -49,9 +49,21 @@ Open [http://localhost:3002](http://localhost:3002) in a browser.
 ## Layout
 
 ```
-src/app            Routes: / (dashboard), /jobs, /api/health
+src/app            Routes: / (dashboard), /jobs, /jobs/new (chat),
+                   /jobs/[id]/{capture,checklist,report}, /api/health, /api/media
 src/components     Reused GoVerge UI: button, status badges, page header, list hero
-src/db             Drizzle client + schema (job, site_report)
+src/lib            Chat parser, checklist template, trades
+src/server         Reporting, checklist, and media storage logic
+src/db             Drizzle client + schema (job, site_report, site_media, …)
 src/styles         Brand tokens (colours)
 scripts/seed.ts    Demo seed data
 ```
+
+## Workflow (Step 2)
+
+Jobs → Capture → Checklist → Report. The engineer creates a job by typing
+or speaking into `/jobs/new` (browser speech recognition, no key needed),
+confirms the parsed draft, then on Capture records the tradesman, uploads
+site photos or video, and adds spoken narration. The checklist feeds a
+generated report with four sections: Site Condition, Hazards, Materials,
+Next Steps. Uploads stay on this machine under `uploads/`.

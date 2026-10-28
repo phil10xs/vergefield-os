@@ -20,6 +20,8 @@ export default async function JobsPage() {
         icon={ClipboardList}
         count={jobs.length}
         countLabel={jobs.length === 1 ? "job" : "jobs"}
+        actionHref="/jobs/new"
+        actionLabel="New job via chat"
         secondaryHref="/"
         secondaryLabel="Back home"
       />

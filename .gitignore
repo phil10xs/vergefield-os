@@ -13,5 +13,8 @@ out/
 # drizzle
 drizzle/*.snap
 
+# local site-capture uploads
+uploads/
+
 # system
 .DS_Store
