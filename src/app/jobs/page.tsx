@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { ClipboardList } from "lucide-react";
 import { ListHero } from "@/components/layout/list-overview";
@@ -25,6 +26,15 @@ export default async function JobsPage() {
         secondaryHref="/"
         secondaryLabel="Back home"
       />
+
+      <p className="mb-4 rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+        Customer intake is live — share{" "}
+        <Link href="/request" className="font-semibold text-link hover:underline">
+          /request
+        </Link>{" "}
+        with owners and tenants. New requests arrive here with a{" "}
+        <span className="font-semibold text-foreground">Requested</span> status.
+      </p>
 
       {jobs.length === 0 ? (
         <EmptyState

@@ -37,6 +37,7 @@ function Badge({
 }
 
 const jobStatusTone: Record<string, Tone> = {
+  requested: "info",
   planned: "info",
   assigned: "info",
   accepted: "info",
@@ -78,6 +79,14 @@ export function JobAssignmentBadge({ assigned }: { assigned: boolean }) {
   return (
     <Badge tone={assigned ? "success" : "neutral"}>
       {assigned ? "Assigned" : "Unassigned"}
+    </Badge>
+  );
+}
+
+export function JobSourceBadge({ source }: { source: string }) {
+  return (
+    <Badge tone={source === "public" ? "info" : "neutral"}>
+      {source === "public" ? "Public request" : "Internal"}
     </Badge>
   );
 }

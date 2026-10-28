@@ -67,3 +67,15 @@ confirms the parsed draft, then on Capture records the tradesman, uploads
 site photos or video, and adds spoken narration. The checklist feeds a
 generated report with four sections: Site Condition, Hazards, Materials,
 Next Steps. Uploads stay on this machine under `uploads/`.
+
+## Public intake (Step 3)
+
+Owners and tenants report issues at `/request` — text or voice description
+plus photos, video, or direct camera capture on mobile. Requests land in the
+trade dashboard with a `Requested` status; the engineer accepts or declines
+from the job detail page (`/jobs/[id]`). The requester gets a reference code
+and a private tracking link (`/request/[id]`).
+
+Both the trade dashboard and the public pages are mobile-first: single-column
+forms, 44px touch targets, and file inputs that open the camera (still or
+video) on phones while degrading to pickers on desktop.

@@ -6,6 +6,7 @@ import {
   siteMedia,
   siteReport,
   type ChecklistItem,
+  type Job,
   type SiteReport,
 } from "@/db/schema";
 import { and, asc, desc, eq } from "drizzle-orm";
@@ -172,6 +173,65 @@ export async function getLatestReport(
     .orderBy(desc(siteReport.createdAt))
     .limit(1);
   return report;
+}
+
+export interface PublicRequestInput {
+  requesterName: string;
+  requesterRole: string;
+  requesterContact: string;
+  propertyAddress: string;
+  trade: string;
+  priority: "low" | "medium" | "high";
+  description: string;
+}
+
+export async function createPublicRequest(
+  input: PublicRequestInput,
+): Promise<Job> {
+  const shortAddress =
+    input.propertyAddress.split(",")[0]?.trim() || input.propertyAddress;
+  const [row] = await db
+    .insert(job)
+    .values({
+      title: `${input.trade} request — ${shortAddress}`.slice(0, 120),
+      siteName: input.propertyAddress,
+      status: "requested",
+      priority: input.priority,
+      tradesmanTrade: input.trade,
+      source: "public",
+      requesterName: input.requesterName,
+      requesterRole: input.requesterRole,
+      requesterContact: input.requesterContact,
+      propertyAddress: input.propertyAddress,
+      notes: input.description,
+    })
+    .returning();
+  if (!row) throw new Error("Request insert failed");
+  await ensureChecklist(row.id);
+  return row;
+}
+
+export async function triageJob(
+  jobId: string,
+  decision: "accept" | "decline",
+): Promise<void> {
+  const [row] = await db.select().from(job).where(eq(job.id, jobId));
+  if (!row) throw new Error("Job not found");
+  if (row.status !== "requested") {
+    throw new Error("Only new requests can be triaged");
+  }
+  await db
+    .update(job)
+    .set({
+      status: decision === "accept" ? "planned" : "cancelled",
+      updatedAt: new Date(),
+    })
+    .where(eq(job.id, jobId));
+}
+
+export async function getPublicJob(jobId: string): Promise<Job | undefined> {
+  const [row] = await db.select().from(job).where(eq(job.id, jobId));
+  return row;
 }
 
 export { REPORT_SECTIONS };

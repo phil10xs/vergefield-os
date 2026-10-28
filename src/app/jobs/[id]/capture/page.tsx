@@ -4,6 +4,7 @@ import { saveCaptureAction } from "@/app/actions/jobs";
 import { PageHeader } from "@/components/layout/page-header";
 import { StageSteps } from "@/components/jobs/stage-steps";
 import { NarrationField } from "@/components/capture/narration-field";
+import { MediaInputs } from "@/components/capture/media-inputs";
 import { Button } from "@/components/ui/button";
 import { TRADE_OPTIONS } from "@/lib/chat-parse";
 import { db } from "@/db";
@@ -39,7 +40,7 @@ export default async function CapturePage({
       <PageHeader
         title={jobRow.title}
         description={`Capture the site: record the tradesman, attach photos or video, and narrate what the camera sees.${jobRow.siteName ? ` Site: ${jobRow.siteName}.` : ""}`}
-        backHref="/jobs"
+        backHref={`/jobs/${jobRow.id}`}
       />
       <StageSteps current="capture" />
 
@@ -97,23 +98,7 @@ export default async function CapturePage({
           <legend className="px-1 font-display text-base font-bold tracking-tight">
             Photos and video
           </legend>
-          <label className="block">
-            <span className="mb-1 block text-sm font-semibold">
-              Attach files
-            </span>
-            <input
-              type="file"
-              name="media"
-              multiple
-              accept="image/*,video/*"
-              required={media.length === 0}
-              className="w-full rounded-xl border border-dashed border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-secondary-foreground"
-            />
-          </label>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Photos or one video, up to 50 MB per file. Files stay on this
-            machine under uploads/.
-          </p>
+          <MediaInputs required={media.length === 0} />
           <div className="mt-3">
             <span className="mb-1 block text-sm font-semibold">
               Spoken narration

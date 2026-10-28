@@ -16,6 +16,11 @@ export const job = pgTable("job", {
   assignee: text("assignee"),
   tradesmanName: text("tradesman_name"),
   tradesmanTrade: text("tradesman_trade"),
+  source: text("source").notNull().default("internal"),
+  requesterName: text("requester_name"),
+  requesterRole: text("requester_role"),
+  requesterContact: text("requester_contact"),
+  propertyAddress: text("property_address"),
   notes: text("notes"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

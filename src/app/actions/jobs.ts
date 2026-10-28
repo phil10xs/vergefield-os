@@ -8,9 +8,11 @@ import { eq } from "drizzle-orm";
 import { parseJobMessage, type JobDraft } from "@/lib/chat-parse";
 import type { ReportSectionKey } from "@/lib/checklist-template";
 import {
+  createPublicRequest,
   ensureChecklist,
   generateReport,
   saveChecklist,
+  triageJob,
 } from "@/server/reporting";
 import { saveUpload } from "@/server/media-store";
 
@@ -126,4 +128,61 @@ export async function saveChecklistAction(
     redirect(`/jobs/${jobId}/report`);
   }
   revalidatePath(`/jobs/${jobId}/checklist`);
+}
+
+export async function createPublicRequestAction(
+  formData: FormData,
+): Promise<void> {
+  const requesterName = formText(formData, "requesterName");
+  const requesterContact = formText(formData, "requesterContact");
+  const propertyAddress = formText(formData, "propertyAddress");
+  const description = formText(formData, "description");
+  if (!requesterName || !requesterContact || !propertyAddress || !description) {
+    throw new Error("Name, contact, address, and description are all required");
+  }
+  const tradeSelect = formText(formData, "trade") ?? "Other";
+  const trade =
+    tradeSelect === "Other"
+      ? (formText(formData, "otherTrade") ?? "Other")
+      : tradeSelect;
+  const created = await createPublicRequest({
+    requesterName,
+    requesterRole: formText(formData, "requesterRole") ?? "Property owner",
+    requesterContact,
+    propertyAddress,
+    trade,
+    priority: formText(formData, "urgency") === "urgent" ? "high" : "medium",
+    description,
+  });
+  const files = formData
+    .getAll("media")
+    .filter((entry): entry is File => entry instanceof File && entry.size > 0);
+  for (const file of files) {
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const saved = await saveUpload(created.id, file.name, file.type, bytes);
+    await db.insert(siteMedia).values({
+      jobId: created.id,
+      kind: saved.kind,
+      filename: saved.filename,
+      mimeType: file.type,
+      sizeBytes: saved.sizeBytes,
+      narration: null,
+    });
+  }
+  revalidatePath("/jobs");
+  redirect(`/request/thanks?jobId=${created.id}`);
+}
+
+export async function triageRequestAction(
+  formData: FormData,
+): Promise<void> {
+  const jobId = formText(formData, "jobId");
+  const decision = formText(formData, "decision");
+  if (!jobId || (decision !== "accept" && decision !== "decline")) {
+    throw new Error("Invalid triage");
+  }
+  await triageJob(jobId, decision);
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath("/jobs");
+  redirect(`/jobs/${jobId}`);
 }

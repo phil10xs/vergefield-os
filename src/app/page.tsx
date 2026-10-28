@@ -50,32 +50,26 @@ export default async function HomePage() {
       </section>
 
       <section
-        aria-label="Demo roadmap"
+        aria-label="Portals"
         className="mt-8 rounded-2xl border border-border bg-card p-5"
       >
         <h2 className="font-display text-base font-bold tracking-tight">
-          Next for the hackathon demo
+          Two doors
         </h2>
         <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
           <li>
-            <strong className="font-semibold text-foreground">
-              Chat-to-action:
-            </strong>{" "}
-            type or speak a site update, VergeField OS creates and dispatches
-            the job.
+            <Link href="/jobs" className="font-semibold text-link hover:underline">
+              Trade dashboard
+            </Link>{" "}
+            — triage requests, capture the site, and generate reports.
           </li>
           <li>
-            <strong className="font-semibold text-foreground">
-              Site photo–video report:
-            </strong>{" "}
-            attach captures to a job and generate a shareable site report.
+            <Link href="/request" className="font-semibold text-link hover:underline">
+              Public request
+            </Link>{" "}
+            — owners and tenants report an issue with photos, video, or voice.
           </li>
         </ul>
-        <p className="mt-3 text-sm">
-          <Link href="/jobs" className="font-semibold text-link hover:underline">
-            Open the jobs board
-          </Link>
-        </p>
       </section>
     </main>
   );

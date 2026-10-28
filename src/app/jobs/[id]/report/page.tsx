@@ -72,7 +72,7 @@ export default async function ReportPage({
         ]
           .filter(Boolean)
           .join(" · ")}
-        backHref="/jobs"
+        backHref={`/jobs/${jobRow.id}`}
       />
       <StageSteps current="report" />
 
