@@ -46,11 +46,13 @@ export default function PublicRequestPage() {
           festive season.
         </h1>
         <p className="mt-1 max-w-md text-sm text-muted-foreground">
-          Landlords, owners and tenants: let&apos;s get your homes and
-          properties ready for visits this festive season. Leave your name,
-          address and then walk through your property and film what you see.
-          You get a report and board tracker for the issues spotted till
-          it&apos;s fixed. Powered by {brand.engine}.
+          Landlords, owners and tenants: we are matching your home fixing
+          bills this festive period. Let&apos;s get your homes and properties
+          fixed &amp; ready for visits this festive season. Walk through your
+          property and film the issues you see. You get a snag list, report
+          and board tracker for the issues spotted so you can track them till
+          they are fixed — and we match your bills on use. Powered by{" "}
+          {brand.engine}.
         </p>
       </div>
 
@@ -115,7 +117,8 @@ export default function PublicRequestPage() {
         </h2>
         <p className="mt-1 text-sm opacity-90">
           Film a 20-second check-in and {brand.engine} builds your snag list
-          and tracker board. Free to try, no account needed.
+          and tracker board for your home/property fixes. Free to try, no
+          account needed.
         </p>
         <Link href="/request/checkin" className="mt-4 inline-block">
           <Button variant="accent" className="w-full sm:w-auto">
