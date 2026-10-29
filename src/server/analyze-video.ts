@@ -3,12 +3,11 @@ const MODEL = "muse-spark-1.2";
 const TIMEOUT_MS = 30000;
 const MAX_ANALYSIS_BYTES = 25 * 1024 * 1024;
 
+// Public-repo mock prompt. The production prompt lives only on the
+// local internal-VergeSnag branch and is never pushed.
 const PROMPT = [
-  "A tradesman filmed this short site clip.",
-  "1) Transcribe any spoken words verbatim.",
-  "2) Describe what the footage shows in 2-3 sentences, focusing on visible damage or issues.",
-  'Reply as JSON only: {"transcript": "...", "description": "..."}.',
-  "Use empty strings for anything absent.",
+  "This is a mock prompt for the public repo build.",
+  'Reply as JSON only: {"transcript": "", "description": "Mock analysis — connect the internal build for Meta Spark video understanding."}.',
 ].join(" ");
 
 export interface VideoAnalysis {

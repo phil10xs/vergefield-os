@@ -101,6 +101,19 @@ transcripts show as unavailable and the team uses the note plus the video's
 own voice. Duration (20 s) and the one-video rule are enforced in the browser
 before submit, with a server-side one-video backstop.
 
+## Public repo vs internal build
+
+This branch is the public source-available build. Three modules ship as
+mocks here and only exist in full on the local `internal-VergeSnag` branch
+(never pushed):
+
+- `src/app/b/[token]/page.tsx` + `src/server/board-access.ts` — magic-link
+  tracker boards (placeholder page + stub here).
+- `src/server/analyze-video.ts` — the Meta Spark prompt (mock prompt here).
+
+Everything else — check-in, visit reports, snag list, owner tracker board —
+runs fully from this branch.
+
 ## Secrets rule
 
 What can be pushed: all source, docs, and config. What stays local: API keys
