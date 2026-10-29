@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { analyzeVideo, assessIssue } from "./analyze-video";
+import { analyzeVideo, assessIssue, sanitizeAiText } from "./analyze-video";
 
 describe("analyzeVideo", () => {
   afterEach(() => {
@@ -82,6 +82,49 @@ describe("analyzeVideo", () => {
       description: "just some words",
       trade: null,
     });
+  });
+
+  it("sanitizes control characters from model replies", async () => {
+    const nul = String.fromCharCode(0);
+    mockAnalysis(
+      JSON.stringify({
+        transcript: `${nul}tap leaks`,
+        description: "dripping tap",
+        trade: "Plumber",
+      }),
+    );
+    await expect(
+      analyzeVideo(Buffer.from("clip"), "video/mp4"),
+    ).resolves.toEqual({
+      transcript: "tap leaks",
+      description: "dripping tap",
+      trade: "Plumber",
+    });
+  });
+});
+
+describe("sanitizeAiText", () => {
+  it("passes normal text through trimmed", () => {
+    expect(sanitizeAiText("  blinds leave a gap  ", 2000)).toBe(
+      "blinds leave a gap",
+    );
+  });
+
+  it("strips control characters", () => {
+    const nul = String.fromCharCode(0);
+    const esc = String.fromCharCode(27);
+    expect(sanitizeAiText(`${nul}hello${esc}world${nul}`, 2000)).toBe(
+      "helloworld",
+    );
+  });
+
+  it("caps length", () => {
+    expect(sanitizeAiText("abcdef", 3)).toBe("abc");
+  });
+
+  it("returns empty for non-strings", () => {
+    expect(sanitizeAiText(null, 2000)).toBe("");
+    expect(sanitizeAiText(42, 2000)).toBe("");
   });
 });
 
