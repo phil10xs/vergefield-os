@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { JobPaymentBadge } from "@/components/ui/status-badge";
-import { setJobStatusAction } from "@/app/actions/jobs";
+import { JobPaymentBadge, JobPriorityBadge } from "@/components/ui/status-badge";
+import {
+  savePaymentDecisionAction,
+  setJobStatusAction,
+} from "@/app/actions/jobs";
 import type { Job } from "@/db/schema";
 
 const COLUMNS = [
@@ -13,6 +16,13 @@ const COLUMNS = [
 ] as const;
 
 const ALL_STATUSES = [...COLUMNS, { key: "cancelled", label: "Cancelled" }] as const;
+
+function formatDay(date: Date): string {
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+  });
+}
 
 export function TrackBoard({ jobs }: { jobs: Job[] }) {
   const parked = jobs.filter(
@@ -36,31 +46,55 @@ export function TrackBoard({ jobs }: { jobs: Job[] }) {
                   {cards.length}
                 </span>
               </h2>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {cards.map((card) => (
                   <article
                     key={card.id}
-                    className="rounded-xl border border-border bg-card p-3"
+                    className="rounded-2xl border border-border bg-card p-4"
                   >
-                    <Link
-                      href={`/jobs/${card.id}`}
-                      className="block text-sm font-semibold leading-snug hover:underline"
-                    >
-                      {card.title}
-                    </Link>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {card.propertyAddress ?? card.siteName ?? "Unassigned site"}
-                      {card.tradesmanTrade ? ` · ${card.tradesmanTrade}` : ""}
+                    {card.source === "public" ? (
+                      <Link
+                        href={`/request/${card.id}`}
+                        className="block text-sm font-bold leading-snug hover:underline"
+                      >
+                        {card.title}
+                      </Link>
+                    ) : (
+                      <p className="block text-sm font-bold leading-snug">
+                        {card.title}
+                      </p>
+                    )}
+                    <p className="mt-2 truncate rounded-lg bg-secondary px-2.5 py-1.5 text-xs font-semibold text-secondary-foreground">
+                      {card.propertyAddress ??
+                        card.siteName ??
+                        "Unassigned site"}
                     </p>
-                    <p className="mt-2">
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      <JobPriorityBadge priority={card.priority} />
                       <JobPaymentBadge
                         status={card.paymentStatus}
                         amountPence={card.paymentAmount}
                       />
-                    </p>
+                    </div>
+                    <dl className="mt-2 space-y-1 text-xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <dt className="text-muted-foreground">
+                          {card.tradesmanTrade ?? "Trade detecting…"}
+                        </dt>
+                        <dd className="truncate font-semibold">
+                          {card.tradesmanName ?? card.assignee ?? "Unassigned"}
+                        </dd>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <dt className="text-muted-foreground">Visit</dt>
+                        <dd className="font-semibold">
+                          {formatDay(card.createdAt)}
+                        </dd>
+                      </div>
+                    </dl>
                     <form
                       action={setJobStatusAction}
-                      className="mt-2 flex gap-2"
+                      className="mt-3 flex gap-2"
                     >
                       <input type="hidden" name="jobId" value={card.id} />
                       <select
@@ -79,11 +113,49 @@ export function TrackBoard({ jobs }: { jobs: Job[] }) {
                         Move
                       </Button>
                     </form>
+                    {card.paymentStatus === "sent" ? null : (
+                      <form
+                        action={savePaymentDecisionAction}
+                        className="mt-2 flex gap-2"
+                      >
+                        <input type="hidden" name="jobId" value={card.id} />
+                        <input
+                          name="amount"
+                          inputMode="decimal"
+                          defaultValue={
+                            card.paymentAmount
+                              ? (card.paymentAmount / 100).toString()
+                              : ""
+                          }
+                          placeholder="£"
+                          aria-label={`Payment amount for ${card.title}`}
+                          className="h-9 min-w-0 flex-1 rounded-lg border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        />
+                        <Button
+                          type="submit"
+                          name="decision"
+                          value="due"
+                          size="sm"
+                          variant="outline"
+                        >
+                          Due
+                        </Button>
+                        <Button
+                          type="submit"
+                          name="decision"
+                          value="sent"
+                          size="sm"
+                          variant="outline"
+                        >
+                          Sent
+                        </Button>
+                      </form>
+                    )}
                   </article>
                 ))}
                 {cards.length === 0 ? (
                   <p className="rounded-xl border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
-                    Nothing here.
+                    Nothing here yet.
                   </p>
                 ) : null}
               </div>

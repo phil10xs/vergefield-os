@@ -17,7 +17,7 @@ export default async function TrackPage({
   searchParams: Promise<{ view?: string }>;
 }) {
   const { view } = await searchParams;
-  const current = view === "board" ? "board" : "list";
+  const current = view === "list" ? "list" : "board";
   const jobs = await db.select().from(job).orderBy(asc(job.createdAt));
 
   return (

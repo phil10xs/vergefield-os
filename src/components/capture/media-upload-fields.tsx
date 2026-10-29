@@ -4,7 +4,7 @@ import * as React from "react";
 import { MediaInputs } from "./media-inputs";
 import { checkMediaSelection } from "@/lib/media-rules";
 
-function durationOf(file: File): Promise<number> {
+export function durationOf(file: File): Promise<number> {
   if (!file.type.startsWith("video/")) return Promise.resolve(0);
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file);
@@ -38,6 +38,7 @@ export function MediaUploadFields({ required = false }: { required?: boolean }) 
       files.map((file, index) => ({
         kind: file.type.startsWith("video/") ? "video" : "photo",
         durationSeconds: durations[index] ?? 0,
+        sizeBytes: file.size,
       })),
     );
     setError(message);

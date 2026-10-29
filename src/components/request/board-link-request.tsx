@@ -5,8 +5,17 @@ import Link from "next/link";
 import { requestBoardLinkAction } from "@/app/actions/jobs";
 import { Button } from "@/components/ui/button";
 import { ErrorText } from "@/components/layout/page-header";
+import { isValidEmail } from "@/lib/board-token";
 
-export function BoardLinkRequest({ jobId }: { jobId: string }) {
+export function BoardLinkRequest({
+  jobId,
+  knownEmail,
+}: {
+  jobId: string;
+  knownEmail?: string | null;
+}) {
+  const known =
+    knownEmail && isValidEmail(knownEmail) ? knownEmail.trim() : null;
   const [email, setEmail] = React.useState("");
   const [result, setResult] = React.useState<{
     url: string;
@@ -21,7 +30,7 @@ export function BoardLinkRequest({ jobId }: { jobId: string }) {
     setBusy(true);
     setError(null);
     try {
-      const link = await requestBoardLinkAction(jobId, email);
+      const link = await requestBoardLinkAction(jobId, known ?? email);
       setResult(link);
     } catch (caught) {
       setError(
@@ -54,29 +63,28 @@ export function BoardLinkRequest({ jobId }: { jobId: string }) {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-2 sm:flex-row">
-      <input
-        type="email"
-        required
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-        placeholder="you@example.com"
-        aria-label="Email for your board link"
-        className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      />
-      <Button
-        type="submit"
-        variant="accent"
-        disabled={busy}
-        className="w-full sm:w-auto"
-      >
-        {busy ? "Sending…" : "Email me the board"}
+    <form onSubmit={submit} className="flex flex-col gap-2">
+      {known ? (
+        <p className="text-sm text-muted-foreground">
+          We&apos;ll send it to <strong className="text-foreground">{known}</strong>
+        </p>
+      ) : (
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="you@example.com"
+          aria-label="Email for your board link"
+          className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      )}
+      <Button type="submit" variant="accent" disabled={busy} className="w-full">
+        {busy
+          ? "Sending…"
+          : "Email my Home/Property Issues Tracker Board"}
       </Button>
-      {error ? (
-        <div className="sm:col-span-2 sm:w-full">
-          <ErrorText>{error}</ErrorText>
-        </div>
-      ) : null}
+      {error ? <ErrorText>{error}</ErrorText> : null}
     </form>
   );
 }

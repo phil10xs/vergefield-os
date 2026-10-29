@@ -8,7 +8,7 @@ import {
   type Job,
   type SiteReport,
 } from "@/db/schema";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import {
   CHECKLIST_TEMPLATE,
   REPORT_SECTIONS,
@@ -16,6 +16,7 @@ import {
 } from "@/lib/checklist-template";
 import { buildTitle, inferTrade } from "@/lib/media-inference";
 import { sectionText } from "@/lib/report-sections";
+import { condenseTranscript } from "@/lib/sessions";
 
 export async function ensureChecklist(jobId: string): Promise<void> {
   const existing = await db
@@ -32,46 +33,6 @@ export async function ensureChecklist(jobId: string): Promise<void> {
       sort: index,
     })),
   );
-}
-
-export interface ChecklistSave {
-  id: string;
-  checked: boolean;
-  note: string | null;
-}
-
-export async function saveChecklist(
-  jobId: string,
-  items: ChecklistSave[],
-  notes: Record<ReportSectionKey, string>,
-): Promise<void> {
-  for (const item of items) {
-    await db
-      .update(checklistItem)
-      .set({ checked: item.checked, note: item.note || null })
-      .where(
-        and(eq(checklistItem.id, item.id), eq(checklistItem.jobId, jobId)),
-      );
-  }
-  const row = {
-    jobId,
-    siteCondition: notes.site_condition || null,
-    hazards: notes.hazards || null,
-    materials: notes.materials || null,
-    nextSteps: notes.next_steps || null,
-  };
-  await db
-    .insert(jobNotes)
-    .values(row)
-    .onConflictDoUpdate({
-      target: jobNotes.jobId,
-      set: {
-        siteCondition: row.siteCondition,
-        hazards: row.hazards,
-        materials: row.materials,
-        nextSteps: row.nextSteps,
-      },
-    });
 }
 
 export async function generateReport(
@@ -96,11 +57,12 @@ export async function generateReport(
     .where(eq(siteMedia.jobId, jobId))
     .orderBy(asc(siteMedia.createdAt));
   const narration =
-    media
-      .map((row) => row.narration?.trim() || row.transcript?.trim())
-      .filter((value): value is string => Boolean(value))
-      .join(" ")
-      .slice(0, 500) || null;
+    condenseTranscript(
+      media
+        .map((row) => row.narration?.trim() || row.transcript?.trim())
+        .filter((value): value is string => Boolean(value))
+        .join(" "),
+    ) || null;
 
   const bySection = (section: ReportSectionKey) =>
     items.filter((item) => item.section === section);
@@ -158,6 +120,7 @@ export async function getLatestReport(
 export interface PublicRequestInput {
   requesterName: string;
   requesterContact: string;
+  businessName?: string | null;
   propertyAddress: string;
   priority: "low" | "medium" | "high";
   description: string;
@@ -179,6 +142,7 @@ export async function createPublicRequest(
       source: "public",
       requesterName: input.requesterName,
       requesterContact: input.requesterContact,
+      businessName: input.businessName ?? null,
       propertyAddress: input.propertyAddress,
       notes: input.description,
     })
@@ -228,24 +192,6 @@ export async function applyInference(jobId: string): Promise<void> {
     .where(eq(job.id, jobId));
 }
 
-export async function triageJob(
-  jobId: string,
-  decision: "accept" | "decline",
-): Promise<void> {
-  const [row] = await db.select().from(job).where(eq(job.id, jobId));
-  if (!row) throw new Error("Job not found");
-  if (row.status !== "requested") {
-    throw new Error("Only new requests can be triaged");
-  }
-  await db
-    .update(job)
-    .set({
-      status: decision === "accept" ? "planned" : "cancelled",
-      updatedAt: new Date(),
-    })
-    .where(eq(job.id, jobId));
-}
-
 export async function getPublicJob(jobId: string): Promise<Job | undefined> {
   const [row] = await db.select().from(job).where(eq(job.id, jobId));
   return row;
@@ -282,6 +228,28 @@ export async function recordPayment(
     .set({
       paymentAmount: amountPence,
       paymentStatus: "sent",
+      updatedAt: new Date(),
+    })
+    .where(eq(job.id, jobId));
+}
+
+export async function markPaymentDue(
+  jobId: string,
+  amountPence: number | null,
+): Promise<void> {
+  if (
+    amountPence !== null &&
+    (!Number.isInteger(amountPence) ||
+      amountPence <= 0 ||
+      amountPence > 10000000)
+  ) {
+    throw new Error("Enter a valid amount");
+  }
+  await db
+    .update(job)
+    .set({
+      ...(amountPence !== null ? { paymentAmount: amountPence } : {}),
+      paymentStatus: "due",
       updatedAt: new Date(),
     })
     .where(eq(job.id, jobId));

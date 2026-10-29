@@ -1,90 +1,146 @@
+import Link from "next/link";
 import type { Metadata } from "next";
-import { Wrench } from "lucide-react";
-import { createPublicRequestAction } from "@/app/actions/jobs";
+import { BadgePercent, House, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NoteField } from "@/components/request/note-field";
 import { brand } from "@/brand";
 
-export const metadata: Metadata = { title: "Check in" };
+export const metadata: Metadata = { title: "Check in your property" };
 
-const inputClass =
-  "h-11 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+const TESTIMONIALS = [
+  {
+    quote:
+      "Filmed the damp on Tuesday, plumber booked by Friday — and every visit stays on the board.",
+    name: "Amara O., landlord, Manchester",
+  },
+  {
+    quote:
+      "Snag rounds used to die in WhatsApp. Now each flat has a memory.",
+    name: "Tom W., facility manager",
+  },
+  {
+    quote:
+      "No account, no app. Just a link where I watch my repair move to done.",
+    name: "Priya S., tenant",
+  },
+];
 
 export default function PublicRequestPage() {
   return (
     <main className="mx-auto w-full max-w-xl px-[var(--app-gutter)] py-8">
-      <div className="mb-6 flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-          <Wrench className="h-5 w-5" aria-hidden />
-        </div>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <div className="mb-6">
+        <div className="mb-3 flex items-center gap-2.5">
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+            <House className="h-5 w-5" aria-hidden />
+            <Wrench
+              className="absolute -bottom-1 -right-1 h-4.5 w-4.5 rounded-full bg-[var(--gv-signal)] p-0.5 text-black"
+              aria-hidden
+            />
+          </div>
+          <span className="font-display text-lg font-bold tracking-tight">
             {brand.name}
+          </span>
+        </div>
+        <h1 className="font-display text-[length:var(--app-title-size)] font-bold tracking-tight">
+          Check in your property{" "}
+          <span className="text-[var(--gv-teal-bright)]">for free</span> this
+          festive season.
+        </h1>
+        <p className="mt-1 max-w-md text-sm text-muted-foreground">
+          Landlords, owners and tenants: let&apos;s get your homes and
+          properties ready for visits this festive season. Leave your name,
+          address and then walk through your property and film what you see.
+          You get a report and board tracker for the issues spotted till
+          it&apos;s fixed. Powered by {brand.engine}.
+        </p>
+      </div>
+
+      <div className="mb-8 flex items-start gap-3 rounded-2xl bg-[var(--gv-signal)] p-4 text-black">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/10">
+          <BadgePercent className="h-5 w-5" aria-hidden />
+        </span>
+        <div>
+          <p className="font-display text-base font-bold tracking-tight">
+            Festive offer
           </p>
-          <h1 className="font-display text-[length:var(--app-title-size)] font-bold tracking-tight">
-            Check in your property
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Landlords, owners and tenants: leave your name, address and a
-            short note, then film what you see. You get a report and board
-            tracker for the issues spotted till it&apos;s fixed. Powered by{" "}
-            {brand.engine}.
+          <p className="mt-0.5 text-sm font-medium leading-snug">
+            GoVerge is giving discounts on home fixes and repairs checked in
+            with {brand.shortName}.
           </p>
         </div>
       </div>
 
-      <form
-        action={createPublicRequestAction}
-        className="space-y-4 rounded-2xl border border-border bg-card p-4 sm:p-5"
-      >
-        <label className="block">
-          <span className="mb-1 block text-sm font-semibold">Full name</span>
-          <input
-            name="requesterName"
-            required
-            autoComplete="name"
-            placeholder="e.g. Jordan Lee"
-            className={inputClass}
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1 block text-sm font-semibold">
-            Property address
-          </span>
-          <input
-            name="propertyAddress"
-            required
-            autoComplete="street-address"
-            placeholder="e.g. 12 Rosebank Road, Manchester"
-            className={inputClass}
-          />
-        </label>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block">
-            <span className="mb-1 block text-sm font-semibold">
-              Phone or email
-            </span>
-            <input
-              name="requesterContact"
-              required
-              autoComplete="tel"
-              placeholder="How should the team reach you?"
-              className={inputClass}
+      <section aria-label="Before and after VergeSnag" className="mb-8">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <figure className="overflow-hidden rounded-2xl border border-border bg-card">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/checkin-before.jpg"
+              alt="Neglected UK house with mould, bad sink and broken window close-ups"
+              className="aspect-[4/3] w-full object-cover"
             />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-sm font-semibold">How urgent?</span>
-            <select name="urgency" className={inputClass} defaultValue="normal">
-              <option value="normal">Normal</option>
-              <option value="urgent">Urgent</option>
-            </select>
-          </label>
+            <figcaption className="px-4 py-3">
+              <p className="text-xs font-bold uppercase tracking-wide text-destructive">
+                Before
+              </p>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                Issues spotted too late, scattered across chats.
+              </p>
+            </figcaption>
+          </figure>
+          <figure className="overflow-hidden rounded-2xl border border-border bg-card">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/checkin-after.jpg"
+              alt="Cared-for UK house with fixed wall, sink and window close-ups"
+              className="aspect-[4/3] w-full object-cover"
+            />
+            <figcaption className="px-4 py-3">
+              <p className="text-xs font-bold uppercase tracking-wide text-[var(--gv-teal-bright)]">
+                After
+              </p>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                Checked in, tracked and fixed with {brand.name}.
+              </p>
+            </figcaption>
+          </figure>
         </div>
-        <NoteField />
-        <Button type="submit" variant="accent" className="w-full">
-          Submit check-in
-        </Button>
-      </form>
+      </section>
+
+      <section
+        aria-label={`Start using ${brand.name}`}
+        className="mb-8 rounded-2xl bg-primary p-5 text-primary-foreground sm:p-6"
+      >
+        <h2 className="font-display text-xl font-bold tracking-tight">
+          Your property, remembered.
+        </h2>
+        <p className="mt-1 text-sm opacity-90">
+          Film a 20-second check-in and {brand.engine} builds your snag list
+          and tracker board. Free to try, no account needed.
+        </p>
+        <Link href="/request/checkin" className="mt-4 inline-block">
+          <Button variant="accent" className="w-full sm:w-auto">
+            Start your check-in
+          </Button>
+        </Link>
+      </section>
+
+      <section aria-label="What owners say" className="mb-8">
+        <h2 className="mb-2 font-display text-lg font-bold tracking-tight">
+          What owners say
+        </h2>
+        <div className="divide-y divide-border">
+          {TESTIMONIALS.map((item) => (
+            <figure key={item.name} className="py-3">
+              <blockquote className="text-sm leading-relaxed">
+                &ldquo;{item.quote}&rdquo;
+              </blockquote>
+              <figcaption className="mt-1 text-xs font-semibold text-muted-foreground">
+                — {item.name}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }

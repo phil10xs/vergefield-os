@@ -1,4 +1,4 @@
-# VergeSnap
+# VergeSnag (Beta)
 
 Property check-ins for the Meta AI Global Hackathon (indie track),
 powered by the VergeSnag AI engine. Check in on your property, get an
@@ -50,37 +50,38 @@ Open [http://localhost:3002](http://localhost:3002) in a browser.
 ## Layout
 
 ```
-src/app            Routes: / (dashboard), /jobs, /jobs/new (chat),
-                   /jobs/[id]/{capture,checklist,report}, /api/health, /api/media
+src/app            Routes: / (→ /request), /request (check-in landing),
+                   /request/checkin (film + submit), /request/[id] (visit report),
+                   /track (snag list + tracker board), /b/[token] (magic-link board),
+                   /api/health, /api/media
 src/components     Reused GoVerge UI: button, status badges, page header, list hero
-src/lib            Chat parser, checklist template, trades
-src/server         Reporting, checklist, and media storage logic
+src/lib            Trade inference, report sections, session grouping
+src/server         Reporting, board links, and media storage logic
 src/db             Drizzle client + schema (job, site_report, site_media, …)
 src/styles         Brand tokens (colours)
 scripts/seed.ts    Demo seed data
 ```
 
-## Workflow (Step 2)
+## Check-in flow
 
-Jobs → Capture → Checklist → Report. The engineer creates a job by typing
-into `/jobs/new`, confirms the parsed draft, then on Capture records the
-tradesman, uploads site photos or video, and adds written narration.
-The checklist feeds a
-generated report with four sections: Site Condition, Hazards, Materials,
-Next Steps. Uploads stay on this machine under `uploads/`.
+Check in → Visit report → Track. Landlords, owners and tenants check in a
+property from `/request`: name, contact, address, then one video per issue
+(up to 20 seconds each) narrating what they see. Each video becomes a
+session — trade detected, reference issued — grouped under its visit on the
+visit report (`/request/[id]`), with a snag list and a Meta Spark analysis
+block. The owner tracks everything on `/track` (snag list + kanban board),
+moving sessions across columns and marking payment Due/Sent. Uploads stay on
+this machine under `uploads/`.
 
-## Public intake (Step 3)
+Requesters get their property's board without an account: from the visit
+report they request a magic link by email and open a read-only kanban at
+`/b/[token]`, expiring after 7 days. (The old internal trade dashboard under
+`/jobs` was removed — the check-in flow already captures, and `/track`
+already holds the issues.)
 
-Owners and tenants report issues at `/request` — name, address, contact, one
-video up to 20 seconds, plus stills. The trade is detected automatically from
-the video. Requests land in the trade dashboard with a `Requested` status;
-the engineer accepts or declines from the job detail page (`/jobs/[id]`).
-The requester gets a reference code and a private tracking link
-(`/request/[id]`).
-
-Both the trade dashboard and the public pages are mobile-first: single-column
-forms, 44px touch targets, and file inputs that open the camera (still or
-video) on phones while degrading to pickers on desktop.
+Every screen is mobile-first and adaptive across phone, tablet, and laptop:
+single-column forms, 44px touch targets, camera capture on phones degrading
+to pickers on desktop, and a horizontally scrolling board on narrow screens.
 
 ## Meta video understanding (Step 4)
 
@@ -112,12 +113,12 @@ Meta-style key or private key appears in tracked files.
 ## Demo in 5 minutes
 
 ```bash
-pnpm db:seed   # reset to 3 jobs + 1 report + 1 demo request
+pnpm db:seed   # reset to 3 portfolio check-ins + 3-session home visit + demo board
 pnpm dev       # http://localhost:3002
 ```
 
-1. Owner: open `/request`, film ≤20 s narrating the issue, send.
-2. Track the reference at `/request/[id]` — transcript, trade, status.
-3. Trade: open the job from `/jobs`, confirm title and trade, accept.
-4. Capture stills, run the checklist, generate the report.
-5. Back on tracking: the full story, reference to report.
+1. Landlord: open `/request`, start a check-in, film one ≤20 s video per
+   issue narrating what you see, send.
+2. Visit report at `/request/[id]` — sessions, snag list, Meta Spark analysis.
+3. Owner board at `/track` — move sessions across the kanban, mark Due/Sent.
+4. Requester: email the tracker board link from the report, open `/b/[token]`.

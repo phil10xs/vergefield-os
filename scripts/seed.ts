@@ -59,7 +59,7 @@ async function main() {
     .insert(job)
     .values([
       {
-        title: "Second-fix electrics — Plot 12",
+        title: "Electrician request — Hulme Point: second-fix electrics",
         siteName: "Hulme Point",
         status: "in_progress",
         priority: "high",
@@ -68,22 +68,34 @@ async function main() {
         tradesmanTrade: "Electrician",
         paymentStatus: "due",
         paymentAmount: 18000,
+        source: "public",
+        requesterName: "Priya Nair",
+        requesterContact: "priya@example.com",
+        propertyAddress: "Hulme Point, Manchester",
         notes: "Consumer unit and socket fronts outstanding.",
       },
       {
-        title: "Snagging walk — Block B",
+        title: "General request — Hulme Point: snagging walk",
         siteName: "Hulme Point",
-        status: "scheduled",
+        status: "planned",
         priority: "medium",
         assignee: "J. Whitfield",
+        source: "public",
+        requesterName: "Priya Nair",
+        requesterContact: "priya@example.com",
+        propertyAddress: "Hulme Point, Manchester",
         notes: "Client walkthrough Friday 10:00.",
       },
       {
-        title: "Commission MVHR — Plot 8",
+        title: "General request — Salford Quays: MVHR commissioning",
         siteName: "Salford Quays",
         status: "planned",
         priority: "medium",
         assignee: null,
+        source: "public",
+        requesterName: "Tom Becker",
+        requesterContact: "tom@example.com",
+        propertyAddress: "Salford Quays, Manchester",
         notes: "Awaiting ductwork sign-off.",
       },
     ])
@@ -218,7 +230,7 @@ async function main() {
   }
 
   console.log(
-    `Seeded ${[firstFit, snagging, commissioning].filter(Boolean).length} internal jobs + 3-session home visit + reports + photos.`,
+    `Seeded ${[firstFit, snagging, commissioning].filter(Boolean).length} portfolio check-ins + 3-session home visit + reports + photos.`,
   );
   if (leakingTap) {
     console.log(`Visit report: http://localhost:3002/request/${leakingTap.id}`);

@@ -19,6 +19,7 @@ export const job = pgTable("job", {
   source: text("source").notNull().default("internal"),
   requesterName: text("requester_name"),
   requesterContact: text("requester_contact"),
+  businessName: text("business_name"),
   propertyAddress: text("property_address"),
   paymentStatus: text("payment_status").notNull().default("none"),
   paymentAmount: integer("payment_amount"),

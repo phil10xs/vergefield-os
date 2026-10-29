@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { CheckCircle2 } from "lucide-react";
+import { Check, CheckCircle2, ChevronDown } from "lucide-react";
 import {
   JobPaymentBadge,
   JobStatusBadge,
@@ -8,7 +8,11 @@ import {
 import { BoardLinkRequest } from "@/components/request/board-link-request";
 import { REPORT_SECTIONS } from "@/lib/checklist-template";
 import {
+  condenseTranscript,
+  excerptWords,
   formatVisitDay,
+  inferIssue,
+  nameIssue,
   selectVisitSessions,
   sessionAddress,
   visitDayOf,
@@ -90,12 +94,42 @@ export default async function PublicTrackPage({
     } else {
       reports.set(
         session.id,
-        await generateReport(session.id, session.requesterName ?? "VergeSnap", {
+        await generateReport(session.id, session.requesterName ?? "VergeSnag", {
           markSubmitted: false,
         }),
       );
     }
   }
+
+  const views = sessions.map((session) => {
+    const clips = mediaBySession.get(session.id) ?? [];
+    const heard = clips
+      .map((row) => row.transcript?.trim())
+      .filter((value): value is string => Boolean(value));
+    const seen = clips
+      .map((row) => row.visualDescription?.trim())
+      .filter((value): value is string => Boolean(value));
+    const report = reports.get(session.id);
+    const issue = inferIssue(session.notes, heard, seen);
+    return {
+      session,
+      clips,
+      heard,
+      seen,
+      issue,
+      name: nameIssue(
+        [...heard, ...seen, session.notes ?? ""].join(" "),
+        session.tradesmanTrade,
+      ),
+      summary: excerptWords(issue, 10),
+      detail: report
+        ? [
+            { key: "site_condition", body: report.siteCondition },
+            { key: "next_steps", body: report.nextSteps },
+          ]
+        : [],
+    };
+  });
 
   return (
     <main className="mx-auto w-full max-w-2xl px-[var(--app-gutter)] py-8">
@@ -127,134 +161,196 @@ export default async function PublicTrackPage({
         <JobStatusBadge status={visitStatus(sessions)} />
         <span className="text-sm text-muted-foreground">
           {formatVisitDay(day)} · {sessions.length}{" "}
-          {sessions.length === 1 ? "session" : "sessions"}
+          {sessions.length === 1 ? "issue" : "issues"}
         </span>
       </div>
-
-      {sessions.map((session, index) => {
-        const clips = mediaBySession.get(session.id) ?? [];
-        const heard = clips
-          .map((row) => row.transcript?.trim())
-          .filter((value): value is string => Boolean(value));
-        const seen = clips
-          .map((row) => row.visualDescription?.trim())
-          .filter((value): value is string => Boolean(value));
-        const report = reports.get(session.id);
-        const detail = report
-          ? [
-              { key: "site_condition", body: report.siteCondition },
-              { key: "hazards", body: report.hazards },
-              { key: "materials", body: report.materials },
-              { key: "next_steps", body: report.nextSteps },
-            ]
-          : [];
-        return (
-          <section
-            key={session.id}
-            aria-label={`Session ${index + 1}: ${session.title}`}
-            className="mt-8 border-t border-border pt-6"
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Session {index + 1} of {sessions.length}
-            </p>
-            <h2 className="mt-1 font-display text-xl font-bold tracking-tight">
-              {session.title}
-            </h2>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <JobStatusBadge status={session.status} />
-              <JobPaymentBadge
-                status={session.paymentStatus}
-                amountPence={session.paymentAmount}
-              />
-            </div>
-            <dl className="mt-3 grid gap-2 text-sm">
-              <div className="flex gap-2">
-                <dt className="shrink-0 font-semibold">Trade:</dt>
-                <dd>{session.tradesmanTrade ?? "Detecting…"}</dd>
-              </div>
-              {session.notes ? (
-                <div className="flex gap-2">
-                  <dt className="shrink-0 font-semibold">Issue:</dt>
-                  <dd className="whitespace-pre-line leading-relaxed">
-                    {session.notes}
-                  </dd>
-                </div>
-              ) : null}
-              {heard.length > 0 ? (
-                <div className="flex gap-2">
-                  <dt className="shrink-0 font-semibold">Heard:</dt>
-                  <dd className="whitespace-pre-line leading-relaxed">
-                    {heard.join(" ")}
-                  </dd>
-                </div>
-              ) : null}
-              {seen.length > 0 ? (
-                <div className="flex gap-2">
-                  <dt className="shrink-0 font-semibold">Seen:</dt>
-                  <dd className="whitespace-pre-line leading-relaxed text-muted-foreground">
-                    {seen.join(" ")}
-                  </dd>
-                </div>
-              ) : null}
-              {heard.length === 0 && seen.length === 0 ? (
-                <dd className="text-muted-foreground">
-                  {clips.some((row) => row.kind === "video")
-                    ? "Video received — transcription lands here once processed."
-                    : "No video attached — the team works from the note and photos."}
-                </dd>
-              ) : null}
-            </dl>
-            <DetailBlock detail={detail} />
-          </section>
-        );
-      })}
-
-      {media.length > 0 ? (
-        <section aria-label="Visit captures" className="mt-8 border-t border-border pt-6">
-          <h2 className="font-display text-lg font-bold tracking-tight">
-            Photos and videos ({media.length})
-          </h2>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            {media.map((row) => (
-              <figure
-                key={row.id}
-                className="overflow-hidden rounded-2xl border border-border bg-card"
-              >
-                {row.kind === "video" ? (
-                  <video
-                    src={`/api/media/${row.id}`}
-                    controls
-                    preload="metadata"
-                    className="aspect-video w-full bg-black"
-                  />
-                ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={`/api/media/${row.id}`}
-                    alt={row.filename}
-                    className="aspect-video w-full object-cover"
-                  />
-                )}
-              </figure>
-            ))}
-          </div>
-        </section>
+      {anchor.businessName ? (
+        <p className="mt-1 text-sm text-muted-foreground">
+          Checked in by {anchor.requesterName ?? "you"} · {anchor.businessName}
+        </p>
       ) : null}
 
+      <details
+        open
+        className="group mt-6 overflow-hidden rounded-2xl border border-border bg-card"
+      >
+        <summary className="flex cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
+          <ChevronDown
+            className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+            aria-hidden
+          />
+          <span className="font-display text-base font-bold tracking-tight">
+            Snag list · {views.length}{" "}
+            {views.length === 1 ? "issue" : "issues"}
+          </span>
+        </summary>
+        <ul className="space-y-2.5 border-t border-border px-4 py-4">
+          {views.map((view, index) => {
+            const done = view.session.status === "resolved";
+            return (
+              <li key={view.session.id} className="flex items-start gap-3">
+                <span
+                  aria-hidden
+                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 ${
+                    done
+                      ? "border-[var(--gv-teal-bright)] bg-[var(--gv-teal-bright)] text-black"
+                      : "border-muted-foreground/40"
+                  }`}
+                >
+                  {done ? (
+                    <Check className="h-3.5 w-3.5" aria-hidden />
+                  ) : null}
+                </span>
+                <span className="min-w-0 text-sm">
+                  <span className="block font-semibold leading-snug">
+                    {index + 1}. {view.session.title}
+                  </span>
+                  <span className="mt-0.5 block leading-snug text-muted-foreground">
+                    {view.summary}
+                  </span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">
+                    {view.session.tradesmanTrade ?? "Trade detecting…"} ·{" "}
+                    {view.session.status.replace(/_/g, " ")}
+                  </span>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </details>
+
+      <div className="mt-6 space-y-3">
+        {views.map((view, index) => (
+          <details
+            key={view.session.id}
+            open={index === 0}
+            className="group overflow-hidden rounded-2xl border border-border bg-card"
+          >
+            <summary
+              aria-label={`Issue ${index + 1}: ${view.session.title}`}
+              className="flex cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden"
+            >
+              <ChevronDown
+                className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                aria-hidden
+              />
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Issue {index + 1} of {views.length}
+                </span>
+                <span className="block truncate font-display text-base font-bold tracking-tight">
+                  {view.session.title}
+                </span>
+              </span>
+              <span className="flex shrink-0 items-center gap-1.5">
+                <JobStatusBadge status={view.session.status} />
+                <JobPaymentBadge
+                  status={view.session.paymentStatus}
+                  amountPence={view.session.paymentAmount}
+                />
+              </span>
+            </summary>
+            <div className="border-t border-border px-4 py-4">
+              <dl className="grid gap-2 text-sm">
+                <div className="flex gap-2">
+                  <dt className="shrink-0 font-semibold">Trade:</dt>
+                  <dd>{view.session.tradesmanTrade ?? "Detecting…"}</dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="shrink-0 font-semibold">Issue:</dt>
+                  <dd className="font-semibold leading-relaxed">
+                    {view.name}
+                  </dd>
+                </div>
+                {view.heard.length > 0 ? (
+                  <div className="flex gap-2">
+                    <dt className="shrink-0 font-semibold">Heard:</dt>
+                    <dd className="whitespace-pre-line leading-relaxed">
+                      {condenseTranscript(view.heard.join(" "))}
+                    </dd>
+                  </div>
+                ) : null}
+                {view.seen.length > 0 ? (
+                  <div className="flex gap-2">
+                    <dt className="shrink-0 font-semibold">Seen:</dt>
+                    <dd className="whitespace-pre-line leading-relaxed text-muted-foreground">
+                      {condenseTranscript(view.seen.join(" "))}
+                    </dd>
+                  </div>
+                ) : null}
+                {view.heard.length === 0 && view.seen.length === 0 ? (
+                  <dd className="text-muted-foreground">
+                    {view.clips.some((row) => row.kind === "video")
+                      ? "Video received — transcription lands here once processed."
+                      : "No video attached — the team works from your note."}
+                  </dd>
+                ) : null}
+              </dl>
+              {view.clips.length > 0 ? (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {view.clips.map((row) => (
+                    <figure
+                      key={row.id}
+                      className="overflow-hidden rounded-xl border border-border bg-background"
+                    >
+                      {row.kind === "video" ? (
+                        <video
+                          src={`/api/media/${row.id}`}
+                          controls
+                          preload="metadata"
+                          className="aspect-video w-full bg-black"
+                        />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={`/api/media/${row.id}`}
+                          alt={row.filename}
+                          className="aspect-video w-full object-cover"
+                        />
+                      )}
+                    </figure>
+                  ))}
+                </div>
+              ) : null}
+              {view.detail.length > 0 ? (
+                <div className="mt-4 space-y-3 border-t border-border pt-4">
+                  {view.detail.map((entry) => (
+                    <div key={entry.key}>
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {sectionLabel(entry.key)}
+                      </h3>
+                      <p className="mt-1 whitespace-pre-line text-sm leading-relaxed">
+                        {entry.body || "—"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-4 text-sm text-muted-foreground">
+                  Full detail is still building — check back shortly.
+                </p>
+              )}
+            </div>
+          </details>
+        ))}
+      </div>
+
       <section
-        aria-label="Full board and reports"
-        className="mt-8 rounded-2xl border border-border bg-card p-4"
+        aria-label="Tracker board link"
+        className="mt-6 rounded-2xl border border-border bg-card p-4"
       >
         <h2 className="font-display text-base font-bold tracking-tight">
-          Full board &amp; reports
+          Your tracker board
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Add your email and we&apos;ll send a private link to the tracker
-          board and complete visit reports for this property. No account
+          Get the private tracker-board link for this property. No account
           needed.
         </p>
         <div className="mt-3">
-          <BoardLinkRequest jobId={anchor.id} />
+          <BoardLinkRequest
+            jobId={anchor.id}
+            knownEmail={anchor.requesterContact}
+          />
         </div>
       </section>
 
@@ -264,45 +360,4 @@ export default async function PublicTrackPage({
       </p>
     </main>
   );
-}
-
-function DetailBlock({
-  detail,
-}: {
-  detail: { key: string; body: string | null }[];
-}) {
-  if (detail.length === 0) {
-    return (
-      <p className="mt-3 text-sm text-muted-foreground">
-        Full detail is still building — check back shortly.
-      </p>
-    );
-  }
-  return (
-    <details className="mt-3 rounded-xl border border-border bg-card px-4 py-3">
-      <summary className="cursor-pointer text-sm font-semibold">
-        Full detail
-      </summary>
-      <div className="mt-2 space-y-3">
-        <DetailItems detail={detail} />
-      </div>
-    </details>
-  );
-}
-
-function DetailItems({
-  detail,
-}: {
-  detail: { key: string; body: string | null }[];
-}) {
-  return detail.map((entry) => (
-    <div key={entry.key}>
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {sectionLabel(entry.key)}
-      </h3>
-      <p className="mt-1 whitespace-pre-line text-sm leading-relaxed">
-        {entry.body || "—"}
-      </p>
-    </div>
-  ));
 }

@@ -46,29 +46,52 @@ export function TrackList({ jobs }: { jobs: Job[] }) {
               <ul className="divide-y divide-border/60">
                 {visit.sessions.map((session) => (
                   <li key={session.id}>
-                    <Link
-                      href={`/jobs/${session.id}`}
-                      className="flex flex-col gap-2 px-4 py-3 hover:bg-secondary/50 sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <span className="min-w-0">
-                        <span className="block truncate text-sm font-semibold">
-                          {session.title}
+                    {session.source === "public" ? (
+                      <Link
+                        href={`/request/${session.id}`}
+                        className="flex flex-col gap-2 px-4 py-3 hover:bg-secondary/50 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-semibold">
+                            {session.title}
+                          </span>
+                          <span className="mt-0.5 block text-xs text-muted-foreground">
+                            {session.tradesmanTrade ?? "Trade detecting…"}
+                            {session.tradesmanName
+                              ? ` · ${session.tradesmanName}`
+                              : ""}
+                          </span>
                         </span>
-                        <span className="mt-0.5 block text-xs text-muted-foreground">
-                          {session.tradesmanTrade ?? "Trade detecting…"}
-                          {session.tradesmanName
-                            ? ` · ${session.tradesmanName}`
-                            : ""}
+                        <span className="flex shrink-0 items-center gap-2">
+                          <JobPaymentBadge
+                            status={session.paymentStatus}
+                            amountPence={session.paymentAmount}
+                          />
+                          <JobStatusBadge status={session.status} />
                         </span>
-                      </span>
-                      <span className="flex shrink-0 items-center gap-2">
-                        <JobPaymentBadge
-                          status={session.paymentStatus}
-                          amountPence={session.paymentAmount}
-                        />
-                        <JobStatusBadge status={session.status} />
-                      </span>
-                    </Link>
+                      </Link>
+                    ) : (
+                      <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-semibold">
+                            {session.title}
+                          </span>
+                          <span className="mt-0.5 block text-xs text-muted-foreground">
+                            {session.tradesmanTrade ?? "Trade detecting…"}
+                            {session.tradesmanName
+                              ? ` · ${session.tradesmanName}`
+                              : ""}
+                          </span>
+                        </span>
+                        <span className="flex shrink-0 items-center gap-2">
+                          <JobPaymentBadge
+                            status={session.paymentStatus}
+                            amountPence={session.paymentAmount}
+                          />
+                          <JobStatusBadge status={session.status} />
+                        </span>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
