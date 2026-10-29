@@ -8,7 +8,7 @@ const STEPS = [
   "Uploading your videos",
   "Listening to what you filmed",
   "Detecting the trade",
-  "Building your report, snag list and tracker",
+  "Building your report, Issues snag list and Issues & Bill Tracker board",
 ];
 
 const STEP_MS = 2800;
@@ -20,16 +20,23 @@ const STEP_MS = 2800;
  */
 export function CheckinProgress({
   heading = "Check-in submitted",
+  onCancel,
 }: {
   heading?: string;
+  onCancel?: () => void;
 }) {
   const [step, setStep] = React.useState(0);
+  const [slow, setSlow] = React.useState(false);
 
   React.useEffect(() => {
     const timer = setInterval(() => {
       setStep((current) => Math.min(current + 1, STEPS.length - 1));
     }, STEP_MS);
-    return () => clearInterval(timer);
+    const slowTimer = setTimeout(() => setSlow(true), 60000);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(slowTimer);
+    };
   }, []);
 
   return (
@@ -48,7 +55,7 @@ export function CheckinProgress({
           {heading}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {brand.engine} is building your snag list and tracker board.
+          {brand.engine} is building your Issues snag list and Issues &amp; Bill Tracker board.
         </p>
         <ol className="mt-6 space-y-3 text-left">
           {STEPS.map((label, index) => {
@@ -84,6 +91,20 @@ export function CheckinProgress({
             );
           })}
         </ol>
+        {slow && onCancel ? (
+          <div className="mt-6">
+            <p className="text-xs text-muted-foreground">
+              Taking longer than usual — big videos can take a few minutes.
+            </p>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="mt-2 text-sm font-semibold text-link hover:underline"
+            >
+              Back to check-in
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );

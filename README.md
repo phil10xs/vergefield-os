@@ -52,14 +52,14 @@ Open [http://localhost:3002](http://localhost:3002) in a browser.
 ```
 src/app            Routes: / (→ /request), /request (check-in landing),
                    /request/checkin (film + submit), /request/[id] (visit report),
-                   /track (snag list + tracker board), /b/[token] (magic-link board),
-                   /api/health, /api/media
+                   /track (Issues snag list), /board (read-only Issues & Bill
+                   Tracker board), /b/[token] (placeholder), /api/health, /api/media
 src/components     Reused GoVerge UI: button, status badges, page header, list hero
 src/lib            Trade inference, report sections, session grouping
-src/server         Reporting, board links, and media storage logic
+src/server         Reporting and media storage logic
 src/db             Drizzle client + schema (job, site_report, site_media, …)
 src/styles         Brand tokens (colours)
-scripts/seed.ts    Demo seed data
+scripts/seed.ts    Demo seed data (loads scripts/demo-fixture.json)
 ```
 
 ## Check-in flow
@@ -67,15 +67,11 @@ scripts/seed.ts    Demo seed data
 Check in → Visit report → Track. Landlords, owners and tenants check in a
 property from `/request`: name, contact, address, then one video per issue
 (up to 20 seconds each) narrating what they see. Each video becomes a
-session — trade detected, reference issued — grouped under its visit on the
-visit report (`/request/[id]`), with a snag list and a Meta Spark analysis
-block. The owner tracks everything on `/track` (snag list + kanban board),
-moving sessions across columns and marking payment Due/Sent. Uploads stay on
-this machine under `uploads/`.
-
-Requesters get their property's board without an account: from the visit
-report they request a magic link by email and open a read-only kanban at
-`/b/[token]`, expiring after 7 days.
+session — trade auto-detected, reference issued — grouped under its visit on
+the visit report (`/request/[id]`), with an Issues snag list and a Meta Spark
+analysis block. `/track` holds every property's Issues snag list; from the
+report, "View my Issues & Bill Tracker board" opens the property's read-only
+board at `/board`. Uploads stay on this machine under `uploads/`.
 
 Every screen is mobile-first and adaptive across phone, tablet, and laptop:
 single-column forms, 44px touch targets, camera capture on phones degrading
@@ -101,16 +97,18 @@ before submit, with a server-side one-video backstop.
 
 ## Public repo vs internal build
 
-This branch is the public source-available build. Three modules ship as
-mocks here and only exist in full on the local `internal-VergeSnag` branch
-(never pushed):
+This branch is the public source-available build. What differs from the
+private full build:
 
-- `src/app/b/[token]/page.tsx` + `src/server/board-access.ts` — magic-link
-  tracker boards (placeholder page + stub here).
+- `src/app/b/[token]/page.tsx` — magic-link board placeholder (full
+  email-link board lives in the private repo only).
 - `src/server/analyze-video.ts` — the Meta Spark prompt (mock prompt here).
+- Removed outright: interactive kanban (`TrackBoard`), email board links
+  (`board-access`, `board-mail`, `BoardLinkRequest`), and the old trade
+  dashboard.
 
-Everything else — check-in, visit reports, snag list, owner tracker board —
-runs fully from this branch.
+Everything else — check-in, visit reports, Issues snag list, read-only
+Issues & Bill Tracker board — runs fully from this branch.
 
 ## Secrets rule
 
@@ -124,12 +122,14 @@ Meta-style key or private key appears in tracked files.
 ## Demo in 5 minutes
 
 ```bash
-pnpm db:seed   # reset to 3 portfolio check-ins + 3-session home visit + demo board
+pnpm db:seed   # reset to the 6-check-in mock fixture
 pnpm dev       # http://localhost:3002
 ```
 
 1. Landlord: open `/request`, start a check-in, film one ≤20 s video per
    issue narrating what you see, send.
-2. Visit report at `/request/[id]` — sessions, snag list, Meta Spark analysis.
-3. Owner board at `/track` — move sessions across the kanban, mark Due/Sent.
-4. Requester: email the tracker board link from the report, open `/b/[token]`.
+2. Visit report at `/request/[id]` — sessions, Issues snag list, Meta Spark
+   analysis.
+3. Snag list at `/track` — every property's visits and sessions.
+4. Issues & Bill Tracker board from the report — the property's read-only
+   board.

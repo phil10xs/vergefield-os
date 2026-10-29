@@ -11,7 +11,7 @@ import { db } from "@/db";
 import { job } from "@/db/schema";
 import { asc, eq } from "drizzle-orm";
 
-export const metadata: Metadata = { title: "Property fixes board" };
+export const metadata: Metadata = { title: "Issues & Bill Tracker board" };
 
 const COLUMNS = [
   { key: "requested", label: "Requested" },
@@ -44,8 +44,8 @@ export default async function BoardPage({
     return (
       <main className="mx-auto w-full max-w-xl px-[var(--app-gutter)] py-8">
         <ListHero
-          title="Property fixes board"
-          description="Pick a property to see its fixes across the board."
+          title="Issues & Bill Tracker board"
+          description="Pick a property to see its tracker board."
           icon={KanbanSquare}
           count={addresses.length}
           countLabel={addresses.length === 1 ? "property" : "properties"}
@@ -79,7 +79,7 @@ export default async function BoardPage({
     <main className="mx-auto w-full max-w-[var(--app-page-max)] px-[var(--app-gutter)] py-8">
       <ListHero
         title={title}
-        description="Read-only view of this property's fixes — newest visits first on the report."
+        description="Your read-only Issues & Bill Tracker board for this property."
         icon={KanbanSquare}
         count={jobs.length}
         countLabel={jobs.length === 1 ? "session" : "sessions"}

@@ -152,16 +152,18 @@ export async function createPublicRequest(
   return row;
 }
 
-export async function saveTranscript(
+export async function saveVideoAnalysis(
   mediaId: string,
   transcript: string,
   description: string,
+  trade: string | null,
 ): Promise<void> {
   await db
     .update(siteMedia)
     .set({
       transcript: transcript || null,
       visualDescription: description || null,
+      detectedTrade: trade,
     })
     .where(eq(siteMedia.id, mediaId));
 }
@@ -187,8 +189,13 @@ export async function applyInference(
     .filter(Boolean)
     .join(" ");
   const text = [seen, row.notes?.trim()].filter(Boolean).join("\n");
+  const metaTrade = media
+    .map((entry) => entry.detectedTrade?.trim())
+    .find((value): value is string => Boolean(value));
   const trade =
-    hintedTrade && hintedTrade !== "Other" ? hintedTrade : inferTrade(text) ?? "General";
+    hintedTrade && hintedTrade !== "Other"
+      ? hintedTrade
+      : (metaTrade ?? inferTrade(text) ?? "General");
   await db
     .update(job)
     .set({

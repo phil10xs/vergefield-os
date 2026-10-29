@@ -8,7 +8,7 @@ import {
   applyInference,
   createPublicRequest,
   generateReport,
-  saveTranscript,
+  saveVideoAnalysis,
 } from "@/server/reporting";
 import { groupFilesBySession } from "@/lib/media-rules";
 import { TRADE_OPTIONS } from "@/lib/chat-parse";
@@ -42,7 +42,12 @@ async function saveMediaFiles(
     if (row && saved.kind === "video") {
       const analysis = await analyzeVideo(bytes, file.type);
       if (analysis) {
-        await saveTranscript(row.id, analysis.transcript, analysis.description);
+        await saveVideoAnalysis(
+          row.id,
+          analysis.transcript,
+          analysis.description,
+          analysis.trade,
+        );
       }
     }
   }

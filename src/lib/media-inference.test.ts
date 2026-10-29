@@ -13,6 +13,11 @@ describe("inferTrade", () => {
     ["strong smell of gas in the kitchen", "Gas engineer"],
     ["ceiling needs a fresh skim", "Plasterer"],
     ["blocked kitchen drain", "Plumber"],
+    [
+      "narrow side garden between brick walls, mossy slabs with weeds, overgrown edges",
+      "Gardener",
+    ],
+    ["hot plate needs a proper clean, send a cleaner", "Cleaner"],
   ])("infers %s → %s", (text, trade) => {
     expect(inferTrade(text)).toBe(trade);
   });

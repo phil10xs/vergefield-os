@@ -2,9 +2,9 @@ export const brand = {
   name: "VergeSnag (Beta)",
   shortName: "VergeSnag",
   engine: "VergeSnag AI",
-  tagline: "Check in. Snag list & tracker board in under a minute.",
+  tagline: "Check in. Issues snag list & Issues & Bill Tracker board in under a minute.",
   description:
-    "Check in on your property via VergeSnag, get an organized snag list & tracker board in under a minute — every visit remembered forever.",
+    "Check in on your property via VergeSnag, get an organized Issues snag list & Issues & Bill Tracker board in under a minute — every visit remembered forever.",
 } as const;
 
 export const colors = {

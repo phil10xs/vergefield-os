@@ -17,7 +17,7 @@ export default async function TrackPage() {
     <main className="mx-auto w-full max-w-[var(--app-page-max)] px-[var(--app-gutter)] py-8">
       <ListHero
         title="Track"
-        description="Every property's visits and sessions — as a snag list."
+        description="Every property's visits and sessions — as an Issues snag list."
         icon={ClipboardCheck}
         count={jobs.length}
         countLabel={jobs.length === 1 ? "session" : "sessions"}

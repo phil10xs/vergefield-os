@@ -65,6 +65,7 @@ interface FixtureMedia {
   narration: string | null;
   transcript: string | null;
   visual_description: string | null;
+  detected_trade?: string | null;
   created_at: string;
 }
 
@@ -129,6 +130,7 @@ async function main() {
       narration: entry.narration,
       transcript: entry.transcript,
       visualDescription: entry.visual_description,
+      detectedTrade: entry.detected_trade ?? null,
       createdAt: new Date(entry.created_at),
     });
   }
@@ -142,7 +144,7 @@ async function main() {
   if (withMedia) {
     console.log(`Visit report: http://localhost:3002/request/${withMedia}`);
   }
-  console.log("Snag list: http://localhost:3002/track");
+  console.log("Issues snag list: http://localhost:3002/track");
   await client.end();
 }
 

@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { House } from "lucide-react";
 import { createPublicRequestAction } from "@/app/actions/requests";
 import { CapturePicker } from "@/components/capture/capture-picker";
+import { CheckinForm } from "@/components/request/checkin-form";
 import { NoteField } from "@/components/request/note-field";
 import { SubmitCheckinButton } from "@/components/request/submit-checkin-button";
-import { TRADE_OPTIONS } from "@/lib/chat-parse";
 import { brand } from "@/brand";
 
 export const metadata: Metadata = { title: "New check-in" };
@@ -30,14 +30,11 @@ export default function CheckinPage() {
         </h1>
         <p className="mt-1 max-w-md text-sm text-muted-foreground">
           Leave your details, film what you see, and {brand.engine} builds
-          your snag list and tracker board.
+          your Issues snag list and Issues &amp; Bill Tracker board.
         </p>
       </div>
 
-      <form
-        action={createPublicRequestAction}
-        className="space-y-4 rounded-2xl border border-border bg-card p-4 sm:p-5"
-      >
+      <CheckinForm action={createPublicRequestAction}>
         <label className="block">
           <span className="mb-1 block text-sm font-semibold">Full name</span>
           <input
@@ -99,14 +96,17 @@ export default function CheckinPage() {
           <span className="mb-1 block text-sm font-semibold">
             What trade do you need?
           </span>
-          <select name="trade" className={inputClass} defaultValue="auto">
+          <select
+            name="trade"
+            className={`${inputClass} cursor-not-allowed opacity-70`}
+            defaultValue="auto"
+            disabled
+          >
             <option value="auto">Auto-detect from my videos</option>
-            {TRADE_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
           </select>
+          <span className="mt-1 block text-xs text-muted-foreground">
+            Manual trade picker coming soon — auto-detect is on for now.
+          </span>
         </label>
         <fieldset>
           <legend className="mb-1 px-1 text-sm font-semibold">
@@ -122,7 +122,7 @@ export default function CheckinPage() {
             tracker.
           </p>
         </div>
-      </form>
+      </CheckinForm>
 
       <p className="mt-4 text-center text-sm">
         <Link

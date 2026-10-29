@@ -22,6 +22,8 @@ export const TRADES = [
   "labourer",
   "heating engineer",
   "gas engineer",
+  "gardener",
+  "cleaner",
 ] as const;
 
 export const TRADE_OPTIONS = [

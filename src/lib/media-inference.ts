@@ -173,6 +173,35 @@ const TRADE_KEYWORDS: { trade: string; words: string[] }[] = [
     trade: "Scaffolder",
     words: ["scaffold"],
   },
+  {
+    trade: "Gardener",
+    words: [
+      "garden",
+      "weed",
+      "weeds",
+      "weedy",
+      "moss",
+      "mossy",
+      "lawn",
+      "grass",
+      "hedge",
+      "overgrown",
+      "flowerbed",
+      "pruning",
+      "mow",
+    ],
+  },
+  {
+    trade: "Cleaner",
+    words: [
+      "cleaner",
+      "clean",
+      "deep clean",
+      "scrub",
+      "pressure wash",
+      "jet wash",
+    ],
+  },
 ];
 
 function titleCase(trade: string): string {

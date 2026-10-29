@@ -15,6 +15,11 @@ export function ReportCelebration({ active }: { active: boolean }) {
 
   React.useEffect(() => {
     if (!active) return;
+    try {
+      sessionStorage.removeItem("vf-checkin-submitted");
+    } catch {
+      // Ignore — flag simply won't persist.
+    }
     const canvas = ref.current;
     if (!canvas) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;

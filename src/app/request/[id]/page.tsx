@@ -143,7 +143,7 @@ export default async function PublicTrackPage({
           />
           <div className="text-sm">
             <p className="font-semibold">
-              Analysis complete — snag list ready · {reference}
+              Analysis complete — Issues snag list ready · {reference}
             </p>
             <p className="mt-0.5 text-muted-foreground">
               Your clips are analysed and every issue is listed below.
@@ -182,7 +182,7 @@ export default async function PublicTrackPage({
             aria-hidden
           />
           <span className="font-display text-base font-bold tracking-tight">
-            Snag list · {views.length}{" "}
+            Issues snag list · {views.length}{" "}
             {views.length === 1 ? "issue" : "issues"}
           </span>
         </summary>
@@ -338,22 +338,22 @@ export default async function PublicTrackPage({
       </div>
 
       <section
-        aria-label="Property fixes board"
+        aria-label="Issues and Bill Tracker board"
         className="mt-6 rounded-2xl border border-border bg-card p-4"
       >
         <h2 className="font-display text-base font-bold tracking-tight">
-          Your property fixes
+          Your Issues &amp; Bill Tracker board
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          See every issue from this property laid out on the board. No account
-          needed.
+          See every issue from this property laid out on your tracker board.
+          No account needed.
         </p>
         <div className="mt-3">
           <Link
             href={`/board?property=${encodeURIComponent(address)}`}
             className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-accent-foreground sm:w-auto"
           >
-            View my property fixes on board
+            View my Issues &amp; Bill Tracker board
           </Link>
         </div>
       </section>

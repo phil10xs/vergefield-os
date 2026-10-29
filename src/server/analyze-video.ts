@@ -3,16 +3,49 @@ const MODEL = "muse-spark-1.2";
 const TIMEOUT_MS = 30000;
 const MAX_ANALYSIS_BYTES = 25 * 1024 * 1024;
 
-// Public-repo mock prompt. The production prompt lives only on the
-// local internal-VergeSnag branch and is never pushed.
+// Public-repo mock prompt: generic wording that still returns a real
+// transcript and description. The tuned production prompt lives only in the
+// private repo and is never pushed here.
+const TRADE_CHOICES = [
+  "Plumber",
+  "Electrician",
+  "Carpenter",
+  "Heating engineer",
+  "Gas engineer",
+  "Painter",
+  "Plasterer",
+  "Roofer",
+  "Tiler",
+  "Joiner",
+  "Bricklayer",
+  "Welder",
+  "Scaffolder",
+  "Gardener",
+  "Cleaner",
+  "General",
+];
+
 const PROMPT = [
-  "This is a mock prompt for the public repo build.",
-  'Reply as JSON only: {"transcript": "", "description": "Mock analysis — connect the internal build for Meta Spark video understanding."}.',
+  "A person filmed this short clip.",
+  "1) Transcribe any spoken words.",
+  "2) Describe what the footage shows in 2-3 sentences.",
+  `3) Pick the one trade this issue needs from: ${TRADE_CHOICES.join(", ")}.`,
+  'Reply as JSON only: {"transcript": "...", "description": "...", "trade": "..."}.',
 ].join(" ");
 
 export interface VideoAnalysis {
   transcript: string;
   description: string;
+  trade: string | null;
+}
+
+function normalizeTrade(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const clean = value.trim().toLowerCase();
+  if (!clean) return null;
+  return (
+    TRADE_CHOICES.find((choice) => choice.toLowerCase() === clean) ?? null
+  );
 }
 
 function extensionFor(mimeType: string): string {
@@ -62,18 +95,20 @@ function parseAnalysis(text: string): VideoAnalysis {
       const parsed = JSON.parse(match[0]) as {
         transcript?: unknown;
         description?: unknown;
+        trade?: unknown;
       };
       return {
         transcript:
           typeof parsed.transcript === "string" ? parsed.transcript : "",
         description:
           typeof parsed.description === "string" ? parsed.description : "",
+        trade: normalizeTrade(parsed.trade),
       };
     } catch {
       // Fall through to plain-text handling below.
     }
   }
-  return { transcript: "", description: text.slice(0, 1000) };
+  return { transcript: "", description: text.slice(0, 1000), trade: null };
 }
 
 async function uploadFile(

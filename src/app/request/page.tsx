@@ -24,6 +24,21 @@ const TESTIMONIALS = [
   },
 ];
 
+const HOW_IT_WORKS = [
+  {
+    title: "Check in your property",
+    body: "walk through and film the issues you see in 20-second clips.",
+  },
+  {
+    title: "Get your Issues Issues snag list",
+    body: "VergeSnag AI analyses your clips and lists every issue with its trade.",
+  },
+  {
+    title: "Track on your Issues & Bill Tracker board",
+    body: "follow each issue till it's fixed — bills matched on use.",
+  },
+];
+
 export default function PublicRequestPage() {
   return (
     <main className="mx-auto w-full max-w-xl px-[var(--app-gutter)] py-8">
@@ -41,18 +56,31 @@ export default function PublicRequestPage() {
           </span>
         </div>
         <h1 className="font-display text-[length:var(--app-title-size)] font-bold tracking-tight">
-          Check in your property{" "}
+          Landlords, Home Owners &amp; Tenants - Check in your property{" "}
           <span className="text-[var(--gv-teal-bright)]">for free</span> this
-          festive season.
+          festive season.{" "}
+          <span className="block">See &amp; track your home fix bills.</span>
         </h1>
         <p className="mt-1 max-w-md text-sm text-muted-foreground">
-          Landlords, owners and tenants: we are matching your home fixing
-          bills this festive period. Let&apos;s get your homes and properties
-          fixed &amp; ready for visits this festive season. Walk through your
-          property and film the issues you see. You get a snag list, report
-          and board tracker for the issues spotted so you can track them till
-          they are fixed — and we match your bills on use. Powered by{" "}
-          {brand.engine}.
+          We are matching your home fixing bills this festive period.
+          Let&apos;s get your homes and properties fixed &amp; ready for
+          visits — here&apos;s how it works:
+        </p>
+        <ol className="mt-3 max-w-md space-y-2.5">
+          {HOW_IT_WORKS.map((step, index) => (
+            <li key={step.title} className="flex items-start gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                {index + 1}
+              </span>
+              <p className="text-sm">
+                <span className="font-semibold">{step.title} — </span>
+                <span className="text-muted-foreground">{step.body}</span>
+              </p>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-3 max-w-md text-sm text-muted-foreground">
+          Powered by {brand.engine}.
         </p>
       </div>
 
@@ -116,8 +144,8 @@ export default function PublicRequestPage() {
           Your property, remembered.
         </h2>
         <p className="mt-1 text-sm opacity-90">
-          Film a 20-second check-in and {brand.engine} builds your snag list
-          and tracker board for your home/property fixes. Free to try, no
+          Film a 20-second check-in and {brand.engine} builds your Issues snag list
+          and Issues &amp; Bill Tracker board for your home/property fixes. Free to try, no
           account needed.
         </p>
         <Link href="/request/checkin" className="mt-4 inline-block">
