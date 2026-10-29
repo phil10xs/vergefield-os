@@ -1,7 +1,51 @@
 {
-  "exportedAt": "2026-10-29T14:01:17.261Z",
+  "exportedAt": "2026-10-29T15:58:00.340Z",
   "note": "Mock demo snapshot for the public repo. Media bytes are placeholders written by seed.ts; transcripts and descriptions are the mocked analysis.",
   "jobs": [
+    {
+      "id": "91213d95-f6d7-4a2e-818f-e531494de680",
+      "title": "General request — Hulme Point: snagging walk",
+      "site_name": "Hulme Point",
+      "status": "requested",
+      "priority": "medium",
+      "assignee": "J. Whitfield",
+      "notes": "Client walkthrough Friday 10:00.",
+      "created_at": "2026-10-29T12:19:18.766Z",
+      "updated_at": "2026-10-29T14:32:12.190Z",
+      "tradesman_name": null,
+      "tradesman_trade": null,
+      "source": "public",
+      "requester_name": "Priya Nair",
+      "requester_contact": "priya@example.com",
+      "property_address": "Hulme Point, Manchester",
+      "payment_status": "none",
+      "payment_amount": null,
+      "business_name": null,
+      "severity": null,
+      "cost_band": null
+    },
+    {
+      "id": "3dae3709-b020-43e6-8d5d-2de80cd28992",
+      "title": "General request — Salford Quays: MVHR commissioning",
+      "site_name": "Salford Quays",
+      "status": "requested",
+      "priority": "medium",
+      "assignee": null,
+      "notes": "Awaiting ductwork sign-off.",
+      "created_at": "2026-10-29T12:19:18.766Z",
+      "updated_at": "2026-10-29T14:32:12.190Z",
+      "tradesman_name": null,
+      "tradesman_trade": null,
+      "source": "public",
+      "requester_name": "Tom Becker",
+      "requester_contact": "tom@example.com",
+      "property_address": "Salford Quays, Manchester",
+      "payment_status": "none",
+      "payment_amount": null,
+      "business_name": null,
+      "severity": null,
+      "cost_band": null
+    },
     {
       "id": "8efd86e2-220b-47ae-980a-28e1e39d399e",
       "title": "Electrician request — Hulme Point: second-fix electrics",
@@ -20,47 +64,9 @@
       "property_address": "Hulme Point, Manchester",
       "payment_status": "due",
       "payment_amount": 18000,
-      "business_name": null
-    },
-    {
-      "id": "91213d95-f6d7-4a2e-818f-e531494de680",
-      "title": "General request — Hulme Point: snagging walk",
-      "site_name": "Hulme Point",
-      "status": "requested",
-      "priority": "medium",
-      "assignee": "J. Whitfield",
-      "notes": "Client walkthrough Friday 10:00.",
-      "created_at": "2026-10-29T12:19:18.766Z",
-      "updated_at": "2026-10-29T12:19:18.766Z",
-      "tradesman_name": null,
-      "tradesman_trade": null,
-      "source": "public",
-      "requester_name": "Priya Nair",
-      "requester_contact": "priya@example.com",
-      "property_address": "Hulme Point, Manchester",
-      "payment_status": "none",
-      "payment_amount": null,
-      "business_name": null
-    },
-    {
-      "id": "3dae3709-b020-43e6-8d5d-2de80cd28992",
-      "title": "General request — Salford Quays: MVHR commissioning",
-      "site_name": "Salford Quays",
-      "status": "requested",
-      "priority": "medium",
-      "assignee": null,
-      "notes": "Awaiting ductwork sign-off.",
-      "created_at": "2026-10-29T12:19:18.766Z",
-      "updated_at": "2026-10-29T12:19:18.766Z",
-      "tradesman_name": null,
-      "tradesman_trade": null,
-      "source": "public",
-      "requester_name": "Tom Becker",
-      "requester_contact": "tom@example.com",
-      "property_address": "Salford Quays, Manchester",
-      "payment_status": "none",
-      "payment_amount": null,
-      "business_name": null
+      "business_name": null,
+      "severity": null,
+      "cost_band": null
     },
     {
       "id": "717ba6b3-2c08-4fbf-8d01-fe61a3b1432d",
@@ -80,7 +86,9 @@
       "property_address": "14 Rosebank Road, Manchester",
       "payment_status": "none",
       "payment_amount": null,
-      "business_name": null
+      "business_name": null,
+      "severity": null,
+      "cost_band": null
     },
     {
       "id": "6dcd8a4e-cae9-480e-8d7e-b3778c2eb22d",
@@ -91,7 +99,7 @@
       "assignee": "D. Okafor",
       "notes": "Slipped slate above the front path",
       "created_at": "2026-10-29T12:19:18.772Z",
-      "updated_at": "2026-10-29T12:19:18.772Z",
+      "updated_at": "2026-10-29T14:32:12.190Z",
       "tradesman_name": "D. Okafor",
       "tradesman_trade": "Roofer",
       "source": "public",
@@ -100,7 +108,9 @@
       "property_address": "14 Rosebank Road, Manchester",
       "payment_status": "due",
       "payment_amount": 8500,
-      "business_name": null
+      "business_name": null,
+      "severity": null,
+      "cost_band": null
     },
     {
       "id": "e59ae761-cdb2-4493-9fc8-0bcefc418647",
@@ -111,7 +121,7 @@
       "assignee": "R. Ojo",
       "notes": "Flickering hallway light",
       "created_at": "2026-10-29T12:19:18.773Z",
-      "updated_at": "2026-10-29T12:19:18.773Z",
+      "updated_at": "2026-10-29T14:32:12.190Z",
       "tradesman_name": "R. Ojo",
       "tradesman_trade": "Electrician",
       "source": "public",
@@ -120,7 +130,9 @@
       "property_address": "14 Rosebank Road, Manchester",
       "payment_status": "sent",
       "payment_amount": 12000,
-      "business_name": null
+      "business_name": null,
+      "severity": null,
+      "cost_band": null
     }
   ],
   "reports": [

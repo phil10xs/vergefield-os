@@ -39,6 +39,8 @@ interface FixtureJob {
   business_name: string | null;
   property_address: string | null;
   notes: string | null;
+  severity?: string | null;
+  cost_band?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -96,6 +98,8 @@ async function main() {
       businessName: entry.business_name,
       propertyAddress: entry.property_address,
       notes: entry.notes,
+      severity: entry.severity ?? null,
+      costBand: entry.cost_band ?? null,
       createdAt: new Date(entry.created_at),
       updatedAt: new Date(entry.updated_at),
     });

@@ -26,16 +26,16 @@ const TESTIMONIALS = [
 
 const HOW_IT_WORKS = [
   {
-    title: "Check in your property",
-    body: "walk through and film the issues you see in 20-second clips.",
+    title: "Check in",
+    body: "film the issues you see in 20-second clips.",
   },
   {
-    title: "Get your Issues Issues snag list",
-    body: "VergeSnag AI analyses your clips and lists every issue with its trade.",
+    title: "Get your Issues snag list",
+    body: "VergeSnag AI lists every issue and its trade.",
   },
   {
-    title: "Track on Your Home/Property's Issues & Bills Tracker Board",
-    body: "follow each issue till it's fixed — bills matched on use.",
+    title: "Track it all",
+    body: "your property's issues and bills tracker, till every fix is done.",
   },
 ];
 
@@ -56,15 +56,52 @@ export default function PublicRequestPage() {
           </span>
         </div>
         <h1 className="font-display text-[length:var(--app-title-size)] font-bold tracking-tight">
-          Landlords, Home Owners &amp; Tenants - Check in your property{" "}
-          <span className="text-[var(--gv-teal-bright)]">for free</span> this
-          festive season.{" "}
-          <span className="block">See &amp; track your home fix bills.</span>
+          Landlords, Home Owners &amp; Tenants — check in your property &amp;
+          homes <span className="text-[var(--gv-teal-bright)]">for free.</span>{" "}
+          <span className="block italic">
+            Record the issues. Get your Issues snag list. Track fixes and
+            bills on us 🙂
+          </span>
         </h1>
+        <section aria-label="Before and after VergeSnag" className="mb-6 mt-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <figure className="overflow-hidden rounded-2xl border border-border bg-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/checkin-before.jpg"
+                alt="Neglected UK house with mould, bad sink and broken window close-ups"
+                className="aspect-square w-full object-cover"
+              />
+              <figcaption className="px-4 py-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-destructive">
+                  Before
+                </p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Issues spotted too late, scattered across chats.
+                </p>
+              </figcaption>
+            </figure>
+            <figure className="overflow-hidden rounded-2xl border border-border bg-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/checkin-after.jpg"
+                alt="Cared-for UK house with fixed wall, sink and window close-ups"
+                className="aspect-square w-full object-cover"
+              />
+              <figcaption className="px-4 py-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-[var(--gv-teal-bright)]">
+                  After
+                </p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Checked in, tracked and fixed with {brand.name}.
+                </p>
+              </figcaption>
+            </figure>
+          </div>
+        </section>
         <p className="mt-1 max-w-md text-sm text-muted-foreground">
-          We are matching your home fixing bills this festive period.
-          Let&apos;s get your homes and properties fixed &amp; ready for
-          visits — here&apos;s how it works:
+          We match your home fixing bills this festive period. Here&apos;s how
+          it works:
         </p>
         <ol className="mt-3 max-w-md space-y-2.5">
           {HOW_IT_WORKS.map((step, index) => (
@@ -93,48 +130,11 @@ export default function PublicRequestPage() {
             Festive offer
           </p>
           <p className="mt-0.5 text-sm font-medium leading-snug">
-            GoVerge is giving discounts on home fixes and repairs checked in
-            with {brand.shortName}.
+            GoVerge matches bills on home fixes checked in with{" "}
+            {brand.shortName}.
           </p>
         </div>
       </div>
-
-      <section aria-label="Before and after VergeSnag" className="mb-8">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <figure className="overflow-hidden rounded-2xl border border-border bg-card">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/checkin-before.jpg"
-              alt="Neglected UK house with mould, bad sink and broken window close-ups"
-              className="aspect-[4/3] w-full object-cover"
-            />
-            <figcaption className="px-4 py-3">
-              <p className="text-xs font-bold uppercase tracking-wide text-destructive">
-                Before
-              </p>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                Issues spotted too late, scattered across chats.
-              </p>
-            </figcaption>
-          </figure>
-          <figure className="overflow-hidden rounded-2xl border border-border bg-card">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/checkin-after.jpg"
-              alt="Cared-for UK house with fixed wall, sink and window close-ups"
-              className="aspect-[4/3] w-full object-cover"
-            />
-            <figcaption className="px-4 py-3">
-              <p className="text-xs font-bold uppercase tracking-wide text-[var(--gv-teal-bright)]">
-                After
-              </p>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                Checked in, tracked and fixed with {brand.name}.
-              </p>
-            </figcaption>
-          </figure>
-        </div>
-      </section>
 
       <section
         aria-label={`Start using ${brand.name}`}
@@ -144,10 +144,8 @@ export default function PublicRequestPage() {
           Your property, remembered.
         </h2>
         <p className="mt-1 text-sm opacity-90">
-          Film a 20-second check-in and {brand.engine} builds your Issues snag list
-          and your Home/Property&apos;s Issues &amp; Bills Tracker Board for
-          your home/property fixes. Free to try, no
-          account needed.
+          One 20-second check-in builds your issues and bills tracker. Free
+          to try, no account needed.
         </p>
         <Link href="/request/checkin" className="mt-4 inline-block">
           <Button variant="accent" className="w-full sm:w-auto">

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Check, CheckCircle2, ChevronDown } from "lucide-react";
 import {
   JobPaymentBadge,
+  JobSeverityBadge,
   JobStatusBadge,
 } from "@/components/ui/status-badge";
 import { ReportCelebration } from "@/components/request/report-celebration";
@@ -11,11 +12,13 @@ import { REPORT_SECTIONS } from "@/lib/checklist-template";
 import {
   condenseTranscript,
   excerptWords,
+  formatBudget,
   formatVisitDay,
   inferIssue,
   nameIssue,
   selectVisitSessions,
   sessionAddress,
+  sumCostBands,
   visitDayOf,
 } from "@/lib/sessions";
 import {
@@ -63,6 +66,7 @@ export default async function PublicTrackPage({
         .orderBy(asc(job.createdAt))
     : [anchor];
   const sessions = selectVisitSessions(siblings, anchor);
+  const budget = sumCostBands(sessions.map((entry) => entry.costBand));
   const address = sessionAddress(anchor);
   const day = visitDayOf(anchor.createdAt);
   const reference = anchor.id.slice(0, 8).toUpperCase();
@@ -164,6 +168,7 @@ export default async function PublicTrackPage({
         <span className="text-sm text-muted-foreground">
           {formatVisitDay(day)} · {sessions.length}{" "}
           {sessions.length === 1 ? "issue" : "issues"}
+          {budget ? ` · budget ${formatBudget(budget)}` : ""}
         </span>
       </div>
       {anchor.businessName ? (
@@ -215,6 +220,9 @@ export default async function PublicTrackPage({
                   <span className="mt-0.5 block text-xs text-muted-foreground">
                     {view.session.tradesmanTrade ?? "Trade detecting…"} ·{" "}
                     {view.session.status.replace(/_/g, " ")}
+                    {view.session.costBand
+                      ? ` · likely ${view.session.costBand}`
+                      : ""}
                   </span>
                 </span>
               </li>
@@ -248,6 +256,9 @@ export default async function PublicTrackPage({
               </span>
               <span className="flex shrink-0 items-center gap-1.5">
                 <JobStatusBadge status={view.session.status} />
+                {view.session.severity ? (
+                  <JobSeverityBadge severity={view.session.severity} />
+                ) : null}
                 <JobPaymentBadge
                   status={view.session.paymentStatus}
                   amountPence={view.session.paymentAmount}
@@ -260,6 +271,12 @@ export default async function PublicTrackPage({
                   <dt className="shrink-0 font-semibold">Trade:</dt>
                   <dd>{view.session.tradesmanTrade ?? "Detecting…"}</dd>
                 </div>
+                {view.session.costBand ? (
+                  <div className="flex gap-2">
+                    <dt className="shrink-0 font-semibold">Likely cost:</dt>
+                    <dd>{view.session.costBand}</dd>
+                  </div>
+                ) : null}
                 <div className="flex gap-2">
                   <dt className="shrink-0 font-semibold">Issue:</dt>
                   <dd className="font-semibold leading-relaxed">

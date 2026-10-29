@@ -3,18 +3,18 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { siteMedia } from "@/db/schema";
+import { job, siteMedia } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import {
   applyInference,
   createPublicRequest,
   generateReport,
-  markPaid,
   saveVideoAnalysis,
   stepJobStatus,
 } from "@/server/reporting";
 import { groupFilesBySession } from "@/lib/media-rules";
 import { TRADE_OPTIONS } from "@/lib/chat-parse";
-import { analyzeVideo } from "@/server/analyze-video";
+import { analyzeVideo, assessIssue } from "@/server/analyze-video";
 import { saveUpload } from "@/server/media-store";
 
 function formText(formData: FormData, key: string): string | null {
@@ -50,6 +50,20 @@ async function saveMediaFiles(
           analysis.description,
           analysis.trade,
         );
+        const assessment = await assessIssue(
+          analysis.transcript,
+          analysis.description,
+        );
+        if (assessment) {
+          await db
+            .update(job)
+            .set({
+              severity: assessment.severity,
+              costBand: assessment.costBand,
+              updatedAt: new Date(),
+            })
+            .where(eq(job.id, jobId));
+        }
       }
     }
   }
@@ -125,14 +139,4 @@ export async function stepJobStatusAction(
   await stepJobStatus(jobId, direction);
   revalidatePath("/track");
   revalidatePath("/board");
-}
-
-export async function markPaidAction(formData: FormData): Promise<void> {
-  const jobId = formText(formData, "jobId");
-  const property = formText(formData, "property") ?? "";
-  if (!jobId) throw new Error("Job is required");
-  await markPaid(jobId);
-  revalidatePath("/track");
-  revalidatePath("/board");
-  redirect(`/board?property=${encodeURIComponent(property)}&paid=1`);
 }

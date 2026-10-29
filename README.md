@@ -79,10 +79,11 @@ to pickers on desktop, and a horizontally scrolling board on narrow screens.
 
 ## Meta video understanding (Step 4)
 
-Each uploaded video is sent to Meta (Muse Spark 1.2 video understanding),
-which returns a speech transcript and a short visual description. The title
-and trade are inferred from the transcript plus the requester's note; the
-tradesman confirms or corrects both when accepting. Photos skip analysis.
+Each uploaded video gets two Meta (Muse Spark 1.2) passes: first video
+understanding returns a speech transcript, a visual description, and the
+trade; then a text-only triage pass grades severity (low/medium/high) and a
+rough UK cost band. Either pass can fail silently — the deterministic engine
+still titles and files every session.
 
 Setup: add your Meta Model API key to `.env.local`:
 

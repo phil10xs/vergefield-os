@@ -8,7 +8,7 @@ const STEPS = [
   "Uploading your videos",
   "Listening to what you filmed",
   "Detecting the trade",
-  "Building your report, Issues snag list and Issues & Bills Tracker Board",
+  "Building your report, Issues snag list & Bills Tracker Board",
 ];
 
 const STEP_MS = 2800;

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { analyzeVideo } from "./analyze-video";
+import { analyzeVideo, assessIssue } from "./analyze-video";
 
 describe("analyzeVideo", () => {
   afterEach(() => {
@@ -82,5 +82,51 @@ describe("analyzeVideo", () => {
       description: "just some words",
       trade: null,
     });
+  });
+});
+
+describe("assessIssue", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  function mockTriage(outputText: string) {
+    vi.stubEnv("META_MODEL_API_KEY", "LLM_test");
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ output_text: outputText }), {
+        status: 200,
+      }),
+    );
+    return spy;
+  }
+
+  it("parses severity and cost band", async () => {
+    mockTriage(JSON.stringify({ severity: "HIGH", cost_band: "£40–£120" }));
+    await expect(assessIssue("tap leaks", "dripping tap")).resolves.toEqual({
+      severity: "high",
+      costBand: "£40–£120",
+    });
+  });
+
+  it("nulls a missing cost band", async () => {
+    mockTriage(JSON.stringify({ severity: "low", cost_band: null }));
+    await expect(assessIssue("a", "b")).resolves.toEqual({
+      severity: "low",
+      costBand: null,
+    });
+  });
+
+  it("rejects an unknown severity", async () => {
+    mockTriage(JSON.stringify({ severity: "urgent", cost_band: "£10" }));
+    await expect(assessIssue("a", "b")).resolves.toBeNull();
+  });
+
+  it("returns null without evidence or key", async () => {
+    vi.stubEnv("META_MODEL_API_KEY", "LLM_test");
+    const spy = vi.spyOn(globalThis, "fetch");
+    await expect(assessIssue("  ", "")).resolves.toBeNull();
+    expect(spy).not.toHaveBeenCalled();
   });
 });

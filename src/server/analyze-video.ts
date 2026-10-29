@@ -173,6 +173,91 @@ async function askAboutVideo(
   }
 }
 
+export interface IssueAssessment {
+  severity: "low" | "medium" | "high";
+  costBand: string | null;
+}
+
+const SEVERITIES = ["low", "medium", "high"] as const;
+
+function parseAssessment(text: string): IssueAssessment | null {
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) return null;
+  try {
+    const parsed = JSON.parse(match[0]) as {
+      severity?: unknown;
+      cost_band?: unknown;
+    };
+    if (
+      typeof parsed.severity !== "string" ||
+      !(SEVERITIES as readonly string[]).includes(
+        parsed.severity.trim().toLowerCase(),
+      )
+    ) {
+      return null;
+    }
+    const cost =
+      typeof parsed.cost_band === "string" ? parsed.cost_band.trim() : "";
+    return {
+      severity: parsed.severity.trim().toLowerCase() as IssueAssessment["severity"],
+      costBand: cost && cost.length <= 32 ? cost : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Second Meta pass: triage the issue for a UK landlord — how urgent is it
+ * and what might it cost? Text-only, so it stays cheap; null on any failure.
+ */
+export async function assessIssue(
+  transcript: string,
+  description: string,
+): Promise<IssueAssessment | null> {
+  const key = process.env.META_MODEL_API_KEY?.trim();
+  const evidence = [transcript.trim(), description.trim()]
+    .filter(Boolean)
+    .join("\n");
+  if (!key || !evidence) return null;
+  try {
+    const response = await fetch(`${META_API_BASE}/v1/responses`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+      body: JSON.stringify({
+        model: MODEL,
+        input: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "input_text",
+                text: [
+                  "You triage UK property repair issues for landlords.",
+                  `Transcript: ${transcript.trim() || "(none)"}`,
+                  `Footage: ${description.trim() || "(none)"}`,
+                  'Reply as JSON only: {"severity": "low|medium|high", "cost_band": "rough UK handyman range like £40–£120, or null"}.',
+                  "Severity means repair urgency: active water, gas, power or security issues are high.",
+                ].join(" "),
+              },
+            ],
+          },
+        ],
+      }),
+    });
+    if (!response.ok) return null;
+    const text = extractText(await response.json());
+    if (!text) return null;
+    return parseAssessment(text);
+  } catch {
+    return null;
+  }
+}
+
 export async function analyzeVideo(
   bytes: Buffer,
   mimeType: string,

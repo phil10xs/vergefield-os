@@ -216,6 +216,45 @@ export function condenseTranscript(text: string, maxWords = 60): string {
   return excerptWords(kept.join(" "), maxWords);
 }
 
+export interface BudgetTotal {
+  low: number;
+  high: number;
+}
+
+/**
+ * Sums per-issue cost bands ("£40–£120", "around £80") into a visit budget.
+ * Unparseable and missing bands are skipped; null when nothing sums.
+ */
+export function sumCostBands(
+  bands: (string | null | undefined)[],
+): BudgetTotal | null {
+  let low = 0;
+  let high = 0;
+  let count = 0;
+  for (const band of bands) {
+    if (!band) continue;
+    const numbers = [...band.replace(/,/g, "").matchAll(/\d+(?:\.\d+)?/g)].map(
+      (match) => Number(match[0]),
+    );
+    if (numbers.length === 0 || numbers.some((n) => !Number.isFinite(n))) {
+      continue;
+    }
+    const first = numbers[0]!;
+    const last = numbers[numbers.length - 1]!;
+    low += Math.min(first, last);
+    high += Math.max(first, last);
+    count += 1;
+  }
+  return count > 0 ? { low, high } : null;
+}
+
+export function formatBudget(total: BudgetTotal): string {
+  const pounds = (n: number) => `£${Math.round(n).toLocaleString("en-GB")}`;
+  return total.low === total.high
+    ? pounds(total.low)
+    : `${pounds(total.low)}–${pounds(total.high)}`;
+}
+
 export function formatPounds(pence: number): string {
   return `£${(pence / 100).toFixed(pence % 100 === 0 ? 0 : 2)}`;
 }

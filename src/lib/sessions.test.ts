@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
   condenseTranscript,
   excerptWords,
+  formatBudget,
   formatPounds,
   formatVisitDay,
   groupSessionsByPropertyVisit,
   inferIssue,
   nameIssue,
   selectVisitSessions,
+  sumCostBands,
 } from "./sessions";
 import type { Job } from "@/db/schema";
 
@@ -21,6 +23,8 @@ function job(overrides: Partial<Job>): Job {
     assignee: null,
     tradesmanName: null,
     tradesmanTrade: null,
+    severity: null,
+    costBand: null,
     source: "internal",
     requesterName: null,
     requesterContact: null,
@@ -168,5 +172,31 @@ describe("formatPounds", () => {
   it("formats pence compactly", () => {
     expect(formatPounds(12000)).toBe("£120");
     expect(formatPounds(1845)).toBe("£18.45");
+  });
+});
+
+describe("sumCostBands", () => {
+  it("sums ranges across issues", () => {
+    expect(sumCostBands(["£40–£120", "£200-£300"])).toEqual({
+      low: 240,
+      high: 420,
+    });
+  });
+
+  it("treats single figures as fixed costs", () => {
+    expect(sumCostBands(["around £80", null, "£1,200"])).toEqual({
+      low: 1280,
+      high: 1280,
+    });
+  });
+
+  it("skips unparseable bands and nulls when empty", () => {
+    expect(sumCostBands(["unclear", null, undefined])).toBeNull();
+    expect(sumCostBands([])).toBeNull();
+  });
+
+  it("formats the visit budget", () => {
+    expect(formatBudget({ low: 450, high: 650 })).toBe("£450–£650");
+    expect(formatBudget({ low: 80, high: 80 })).toBe("£80");
   });
 });

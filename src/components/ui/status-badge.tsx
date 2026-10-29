@@ -62,6 +62,20 @@ export function JobStatusBadge({ status }: { status: string }) {
   );
 }
 
+const severityTone: Record<string, Tone> = {
+  low: "neutral",
+  medium: "warning",
+  high: "danger",
+};
+
+export function JobSeverityBadge({ severity }: { severity: string }) {
+  return (
+    <Badge tone={severityTone[severity] ?? "neutral"}>
+      {humanize(severity)}
+    </Badge>
+  );
+}
+
 const jobPriorityTone: Record<string, Tone> = {
   high: "danger",
   medium: "info",

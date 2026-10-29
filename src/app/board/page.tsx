@@ -1,14 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { CheckCircle2, KanbanSquare } from "lucide-react";
+import { KanbanSquare } from "lucide-react";
 import { ListHero } from "@/components/layout/list-overview";
 import {
   JobPaymentBadge,
   JobStatusBadge,
 } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
-import { ReportCelebration } from "@/components/request/report-celebration";
-import { markPaidAction, stepJobStatusAction } from "@/app/actions/requests";
+import { stepJobStatusAction } from "@/app/actions/requests";
 import { sessionAddress } from "@/lib/sessions";
 import { db } from "@/db";
 import { job } from "@/db/schema";
@@ -22,15 +21,14 @@ const COLUMNS = [
   { key: "requested", label: "Requested" },
   { key: "in_progress", label: "In progress" },
   { key: "completed", label: "Completed" },
-  { key: "paid", label: "Paid" },
 ] as const;
 
 export default async function BoardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ property?: string; paid?: string }>;
+  searchParams: Promise<{ property?: string }>;
 }) {
-  const { property, paid } = await searchParams;
+  const { property } = await searchParams;
 
   if (!property) {
     const rows = await db
@@ -92,31 +90,15 @@ export default async function BoardPage({
 
   return (
     <main className="mx-auto w-full max-w-[var(--app-page-max)] px-[var(--app-gutter)] py-8">
-      <ReportCelebration active={paid === "1"} />
       <ListHero
         title={title}
-        description="Your Home/Property's Issues & Bills Tracker Board for this property."
+        description="Your Home/Property's Issues & Bills Tracker Board for this property — tap ‹ › to move issues along."
         icon={KanbanSquare}
         count={jobs.length}
         countLabel={jobs.length === 1 ? "session" : "sessions"}
         actionHref="/request"
         actionLabel="New check-in"
       />
-
-      {paid === "1" ? (
-        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
-          <CheckCircle2
-            className="mt-0.5 h-5 w-5 shrink-0 text-[var(--gv-teal-bright)]"
-            aria-hidden
-          />
-          <div className="text-sm">
-            <p className="font-semibold">Your payment has been confirmed.</p>
-            <p className="mt-0.5 text-muted-foreground">
-              The issue now shows as Paid on the board.
-            </p>
-          </div>
-        </div>
-      ) : null}
 
       <div className="flex snap-x gap-4 overflow-x-auto pb-2">
         {COLUMNS.map((column) => {
@@ -153,6 +135,7 @@ export default async function BoardPage({
                     )}
                     <p className="mt-1 text-xs text-muted-foreground">
                       {card.tradesmanTrade ?? "Trade detecting…"}
+                      {card.costBand ? ` · likely ${card.costBand}` : ""}
                     </p>
                     <p className="mt-2 flex flex-wrap gap-2">
                       <JobStatusBadge status={card.status} />
@@ -176,38 +159,19 @@ export default async function BoardPage({
                           </Button>
                         </form>
                       ) : null}
-                      {card.status === "completed" ? (
-                        <form action={markPaidAction} className="flex-1">
-                          <input type="hidden" name="jobId" value={card.id} />
-                          <input
-                            type="hidden"
-                            name="property"
-                            value={property}
-                          />
-                          <Button
-                            type="submit"
-                            size="sm"
-                            variant="accent"
-                            className="w-full"
-                          >
-                            Pay Tradesman
-                          </Button>
-                        </form>
-                      ) : card.status === "paid" ? null : (
-                        <form action={stepJobStatusAction} className="flex-1">
-                          <input type="hidden" name="jobId" value={card.id} />
-                          <input type="hidden" name="direction" value="next" />
-                          <Button
-                            type="submit"
-                            size="sm"
-                            variant="outline"
-                            className="w-full"
-                            aria-label={`Move ${card.title} forward`}
-                          >
-                            ›
-                          </Button>
-                        </form>
-                      )}
+                      <form action={stepJobStatusAction} className="flex-1">
+                        <input type="hidden" name="jobId" value={card.id} />
+                        <input type="hidden" name="direction" value="next" />
+                        <Button
+                          type="submit"
+                          size="sm"
+                          variant="outline"
+                          className="w-full"
+                          aria-label={`Move ${card.title} forward`}
+                        >
+                          ›
+                        </Button>
+                      </form>
                     </div>
                   </article>
                 ))}
