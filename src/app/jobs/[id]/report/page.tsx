@@ -98,6 +98,39 @@ export default async function ReportPage({
         ))}
       </div>
 
+      {media.some((row) => row.transcript || row.visualDescription) ? (
+        <section aria-label="Meta Spark analysis" className="mt-6">
+          <h2 className="mb-3 font-display text-lg font-bold tracking-tight">
+            Meta Spark analysis
+          </h2>
+          <div className="space-y-3">
+            {media
+              .filter((row) => row.transcript || row.visualDescription)
+              .map((row) => (
+                <div
+                  key={row.id}
+                  className="rounded-2xl border border-border bg-card p-4 text-sm leading-relaxed"
+                >
+                  {row.transcript ? (
+                    <p className="whitespace-pre-line">
+                      <strong className="font-semibold">Heard: </strong>
+                      {row.transcript}
+                    </p>
+                  ) : null}
+                  {row.visualDescription ? (
+                    <p className="mt-2 whitespace-pre-line text-muted-foreground">
+                      <strong className="font-semibold text-foreground">
+                        Seen:{" "}
+                      </strong>
+                      {row.visualDescription}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+          </div>
+        </section>
+      ) : null}
+
       {media.length > 0 ? (
         <section aria-label="Report captures" className="mt-6">
           <h2 className="mb-3 font-display text-lg font-bold tracking-tight">

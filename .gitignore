@@ -10,6 +10,11 @@ out/
 .env.local
 .env*.local
 
+# keys and secret material (never commit)
+*.pem
+*.key
+secrets/
+
 # drizzle
 drizzle/*.snap
 

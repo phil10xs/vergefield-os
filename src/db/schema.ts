@@ -20,6 +20,8 @@ export const job = pgTable("job", {
   requesterName: text("requester_name"),
   requesterContact: text("requester_contact"),
   propertyAddress: text("property_address"),
+  paymentStatus: text("payment_status").notNull().default("none"),
+  paymentAmount: integer("payment_amount"),
   notes: text("notes"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -83,8 +85,21 @@ export const jobNotes = pgTable("job_notes", {
   nextSteps: text("next_steps"),
 });
 
+export const boardToken = pgTable("board_token", {
+  token: text("token").primaryKey(),
+  jobId: uuid("job_id")
+    .references(() => job.id, { onDelete: "cascade" })
+    .notNull(),
+  email: text("email").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type Job = typeof job.$inferSelect;
 export type NewJob = typeof job.$inferInsert;
+export type BoardToken = typeof boardToken.$inferSelect;
 export type SiteReport = typeof siteReport.$inferSelect;
 export type NewSiteReport = typeof siteReport.$inferInsert;
 export type SiteMedia = typeof siteMedia.$inferSelect;

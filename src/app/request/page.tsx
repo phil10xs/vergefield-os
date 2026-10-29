@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Wrench } from "lucide-react";
 import { createPublicRequestAction } from "@/app/actions/jobs";
 import { Button } from "@/components/ui/button";
-import { MediaUploadFields } from "@/components/capture/media-upload-fields";
 import { NoteField } from "@/components/request/note-field";
 import { brand } from "@/brand";
 
@@ -26,10 +25,10 @@ export default function PublicRequestPage() {
             Request a repair
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Owners and tenants: leave your name and address, then show the
-            issue — one video up to 20 seconds, plus stills. The trade is
-            detected automatically from your video. No account needed, and most
-            requests take under a minute.
+            Owners and tenants: leave your name, address, and a short
+            description of the issue. The trade is detected automatically from
+            what you write. No account needed, and most requests take under a
+            minute.
           </p>
         </div>
       </div>
@@ -82,12 +81,6 @@ export default function PublicRequestPage() {
           </label>
         </div>
         <NoteField />
-        <div>
-          <span className="mb-1 block text-sm font-semibold">
-            Photos or video
-          </span>
-          <MediaUploadFields />
-        </div>
         <Button type="submit" variant="accent" className="w-full">
           Send request
         </Button>

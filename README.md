@@ -99,6 +99,15 @@ transcripts show as unavailable and the team uses the note plus the video's
 own voice. Duration (20 s) and the one-video rule are enforced in the browser
 before submit, with a server-side one-video backstop.
 
+## Secrets rule
+
+What can be pushed: all source, docs, and config. What stays local: API keys
+and credentials in `.env.local` (gitignored), `*.pem` / `*.key` files, and
+anything under `secrets/`. The demo runs fully without a key (Meta analysis
+shows as unavailable); with `META_MODEL_API_KEY` set locally, video analysis
+goes live. Run `pnpm check:secrets` before every push — it fails if a
+Meta-style key or private key appears in tracked files.
+
 ## Demo in 5 minutes
 
 ```bash

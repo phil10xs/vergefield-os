@@ -77,6 +77,7 @@ export async function saveChecklist(
 export async function generateReport(
   jobId: string,
   author: string,
+  options: { markSubmitted?: boolean } = {},
 ): Promise<SiteReport> {
   const [jobRow] = await db.select().from(job).where(eq(job.id, jobId));
   if (!jobRow) throw new Error("Job not found");
@@ -133,10 +134,12 @@ export async function generateReport(
     })
     .returning();
   if (!report) throw new Error("Report insert failed");
-  await db
-    .update(job)
-    .set({ status: "submitted", updatedAt: new Date() })
-    .where(eq(job.id, jobId));
+  if (options.markSubmitted !== false) {
+    await db
+      .update(job)
+      .set({ status: "submitted", updatedAt: new Date() })
+      .where(eq(job.id, jobId));
+  }
   return report;
 }
 
@@ -246,6 +249,42 @@ export async function triageJob(
 export async function getPublicJob(jobId: string): Promise<Job | undefined> {
   const [row] = await db.select().from(job).where(eq(job.id, jobId));
   return row;
+}
+
+const DEMO_STATUSES = [
+  "requested",
+  "planned",
+  "in_progress",
+  "submitted",
+  "resolved",
+  "cancelled",
+] as const;
+
+export async function setJobStatus(jobId: string, status: string): Promise<void> {
+  if (!(DEMO_STATUSES as readonly string[]).includes(status)) {
+    throw new Error("Invalid status");
+  }
+  await db
+    .update(job)
+    .set({ status, updatedAt: new Date() })
+    .where(eq(job.id, jobId));
+}
+
+export async function recordPayment(
+  jobId: string,
+  amountPence: number,
+): Promise<void> {
+  if (!Number.isInteger(amountPence) || amountPence <= 0 || amountPence > 10000000) {
+    throw new Error("Enter a valid amount");
+  }
+  await db
+    .update(job)
+    .set({
+      paymentAmount: amountPence,
+      paymentStatus: "sent",
+      updatedAt: new Date(),
+    })
+    .where(eq(job.id, jobId));
 }
 
 export { REPORT_SECTIONS };

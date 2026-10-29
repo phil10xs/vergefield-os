@@ -1,8 +1,8 @@
 export const brand = {
   name: "VergeField OS",
-  tagline: "Chat-to-action FieldOps. Type, snap, done.",
+  tagline: "Check in. Snag list & tracker board in under a minute.",
   description:
-    "From leak to fixed — report an issue in seconds and track it to done.",
+    "Check in on your property via VergeOS, get an organized snag list & tracker board in under a minute — every visit remembered forever.",
 } as const;
 
 export const colors = {

@@ -90,3 +90,22 @@ export function JobSourceBadge({ source }: { source: string }) {
     </Badge>
   );
 }
+
+export function JobPaymentBadge({
+  status,
+  amountPence,
+}: {
+  status: string;
+  amountPence: number | null;
+}) {
+  if (status !== "due" && status !== "sent") return null;
+  const amount =
+    typeof amountPence === "number"
+      ? ` £${(amountPence / 100).toFixed(amountPence % 100 === 0 ? 0 : 2)}`
+      : "";
+  return (
+    <Badge tone={status === "sent" ? "success" : "warning"}>
+      {status === "sent" ? `Sent${amount}` : `Due${amount}`}
+    </Badge>
+  );
+}

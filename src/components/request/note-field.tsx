@@ -23,13 +23,11 @@ export function NoteField() {
     <div>
       <label className="block">
         <span className="mb-1 block text-sm font-semibold">
-          What is the issue?{" "}
-          <span className="font-normal text-muted-foreground">
-            (optional if your video explains it)
-          </span>
+          What is the issue?
         </span>
         <textarea
           name="note"
+          required
           value={value}
           onChange={(event) => setValue(event.target.value)}
           rows={3}

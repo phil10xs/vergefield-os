@@ -69,6 +69,12 @@ export default async function HomePage() {
             </Link>{" "}
             — owners and tenants report an issue with photos or video.
           </li>
+          <li>
+            <Link href="/track" className="font-semibold text-link hover:underline">
+              Track
+            </Link>{" "}
+            — snag list and board for every property&apos;s visits and sessions.
+          </li>
         </ul>
       </section>
     </main>

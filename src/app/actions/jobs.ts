@@ -12,10 +12,13 @@ import {
   createPublicRequest,
   ensureChecklist,
   generateReport,
+  recordPayment,
   saveChecklist,
   saveTranscript,
+  setJobStatus,
   triageJob,
 } from "@/server/reporting";
+import { requestBoardLink } from "@/server/board-access";
 import { analyzeVideo } from "@/server/analyze-video";
 import { saveUpload } from "@/server/media-store";
 
@@ -152,46 +155,20 @@ export async function createPublicRequestAction(
   if (!requesterName || !requesterContact || !propertyAddress) {
     throw new Error("Name, contact, and address are all required");
   }
-  const files = formData
-    .getAll("media")
-    .filter((entry): entry is File => entry instanceof File && entry.size > 0);
-  if (files.length === 0 && !note) {
-    throw new Error("Describe the issue or attach a photo or video");
-  }
-  if (files.filter((file) => file.type.startsWith("video/")).length > 1) {
-    throw new Error("Please attach at most one video — add stills for the rest");
+  if (!note) {
+    throw new Error("Describe the issue");
   }
   const created = await createPublicRequest({
     requesterName,
     requesterContact,
     propertyAddress,
     priority: formText(formData, "urgency") === "urgent" ? "high" : "medium",
-    description: note ?? "",
+    description: note,
   });
-  for (const file of files) {
-    const bytes = Buffer.from(await file.arrayBuffer());
-    const saved = await saveUpload(created.id, file.name, file.type, bytes);
-    const [row] = await db
-      .insert(siteMedia)
-      .values({
-        jobId: created.id,
-        kind: saved.kind,
-        filename: saved.filename,
-        mimeType: file.type,
-        sizeBytes: saved.sizeBytes,
-        narration: null,
-      })
-      .returning();
-    if (row && saved.kind === "video") {
-      const analysis = await analyzeVideo(bytes, file.type);
-      if (analysis) {
-        await saveTranscript(row.id, analysis.transcript, analysis.description);
-      }
-    }
-  }
   await applyInference(created.id);
+  await generateReport(created.id, requesterName, { markSubmitted: false });
   revalidatePath("/jobs");
-  redirect(`/request/thanks?jobId=${created.id}`);
+  redirect(`/request/${created.id}?new=1`);
 }
 
 export async function triageRequestAction(
@@ -218,4 +195,38 @@ export async function triageRequestAction(
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath("/jobs");
   redirect(`/jobs/${jobId}`);
+}
+
+export async function setJobStatusAction(
+  formData: FormData,
+): Promise<void> {
+  const jobId = formText(formData, "jobId");
+  const status = formText(formData, "status");
+  if (!jobId || !status) throw new Error("Job and status are required");
+  await setJobStatus(jobId, status);
+  revalidatePath("/track");
+  revalidatePath("/jobs");
+  revalidatePath(`/jobs/${jobId}`);
+}
+
+export async function requestBoardLinkAction(
+  jobId: string,
+  email: string,
+): Promise<{ url: string; emailed: boolean }> {
+  return requestBoardLink(jobId, email);
+}
+
+export async function recordPaymentAction(
+  formData: FormData,
+): Promise<void> {
+  const jobId = formText(formData, "jobId");
+  const raw = formText(formData, "amount");
+  if (!jobId || !raw) throw new Error("Job and amount are required");
+  const pounds = Number(raw);
+  if (!Number.isFinite(pounds) || pounds <= 0) {
+    throw new Error("Enter a valid amount");
+  }
+  await recordPayment(jobId, Math.round(pounds * 100));
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath("/track");
 }

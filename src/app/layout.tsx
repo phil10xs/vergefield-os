@@ -57,7 +57,14 @@ export default function RootLayout({
           {children}
           <footer className="mx-auto w-full max-w-[var(--app-page-max)] px-[var(--app-gutter)] pb-8">
             <p className="border-t border-border pt-4 text-xs text-muted-foreground">
-              VergeField OS · MIT open source ·{" "}
+              VergeField OS ·{" "}
+              <a
+                href="https://github.com/phil10xs/vergefield-os/blob/main/LICENSE"
+                className="font-semibold text-link hover:underline"
+              >
+                Source-available (BSL)
+              </a>{" "}
+              ·{" "}
               <a
                 href="https://github.com/phil10xs/vergefield-os"
                 className="font-semibold text-link hover:underline"

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { triageRequestAction } from "@/app/actions/jobs";
+import { recordPaymentAction, triageRequestAction } from "@/app/actions/jobs";
 import { EmptyState, PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import {
+  JobPaymentBadge,
   JobPriorityBadge,
   JobSourceBadge,
   JobStatusBadge,
@@ -61,6 +62,62 @@ export default async function JobDetailPage({
         <JobStatusBadge status={jobRow.status} />
         <JobPriorityBadge priority={jobRow.priority} />
       </div>
+
+      <section
+        aria-label="Payment"
+        className="mb-6 rounded-2xl border border-border bg-card p-4"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-base font-bold tracking-tight">
+            Payment{jobRow.tradesmanName ? ` · ${jobRow.tradesmanName}` : ""}
+          </h2>
+          <JobPaymentBadge
+            status={
+              jobRow.paymentStatus === "none" && jobRow.paymentAmount
+                ? "due"
+                : jobRow.paymentStatus
+            }
+            amountPence={jobRow.paymentAmount}
+          />
+        </div>
+        {jobRow.paymentStatus === "sent" ? (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Simulated payment sent — no real money moves in this demo.
+          </p>
+        ) : (
+          <form
+            action={recordPaymentAction}
+            className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end"
+          >
+            <input type="hidden" name="jobId" value={jobRow.id} />
+            <label className="block max-w-xs">
+              <span className="mb-1 block text-sm font-semibold">
+                Amount (£)
+              </span>
+              <input
+                name="amount"
+                inputMode="decimal"
+                required
+                defaultValue={
+                  jobRow.paymentAmount
+                    ? (jobRow.paymentAmount / 100).toString()
+                    : ""
+                }
+                placeholder="e.g. 180"
+                className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </label>
+            <Button type="submit" variant="accent" className="w-full sm:w-auto">
+              Mark payment sent
+            </Button>
+          </form>
+        )}
+        {jobRow.paymentStatus !== "sent" ? (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Simulated — no real money moves in this demo.
+          </p>
+        ) : null}
+      </section>
 
       {isRequest ? (
         <section
