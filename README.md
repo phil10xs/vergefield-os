@@ -5,9 +5,8 @@ powered by the VergeSnag AI engine. Check in on your property, get an
 organized snag list & tracker board in under a minute — every visit
 remembered forever.
 
-Separate project from GoVerge. It reuses GoVerge's brand tokens, button
-variants, status badges, page header, and list hero (copied, not linked),
-without modifying the GoVerge repo.
+Standalone project with its own VergeSnag brand tokens, button
+variants, status badges, page header, and list hero.
 
 ## Stack
 
@@ -16,7 +15,7 @@ without modifying the GoVerge repo.
 - PostgreSQL 16 via Drizzle ORM (database `vergefield` on local Postgres;
   docker-compose alternative runs isolated on port **5433**)
 
-Port 3002 avoids clashing with GoVerge's 3000/3001.
+Port 3002 avoids clashing with other local apps on 3000/3001.
 
 ## Setup
 
@@ -54,7 +53,7 @@ src/app            Routes: / (→ /request), /request (check-in landing),
                    /request/checkin (film + submit), /request/[id] (visit report),
                    /track (Issues snag list), /board (read-only Issues & Bill
                    Tracker board), /b/[token] (placeholder), /api/health, /api/media
-src/components     Reused GoVerge UI: button, status badges, page header, list hero
+src/components     VergeSnag UI: button, status badges, page header, list hero
 src/lib            Trade inference, report sections, session grouping
 src/server         Reporting and media storage logic
 src/db             Drizzle client + schema (job, site_report, site_media, …)

@@ -130,8 +130,8 @@ export default function PublicRequestPage() {
             Festive offer
           </p>
           <p className="mt-0.5 text-sm font-medium leading-snug">
-            GoVerge matches bills on home fixes checked in with{" "}
-            {brand.shortName}.
+            {brand.shortName} matches your bills on home fixes checked
+            in this festive season.
           </p>
         </div>
       </div>

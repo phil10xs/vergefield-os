@@ -1,6 +1,6 @@
 /**
  * Capped in-browser recording so phone clips stay small without losing what
- * the model needs to see and hear. Mirrors GoVerge's capture budget (720p,
+ * the model needs to see and hear. Uses a capped capture budget (720p,
  * ~2 Mbps): a 20-second check-in lands around 6 MB instead of 30–130 MB of
  * raw iPhone footage.
  */
