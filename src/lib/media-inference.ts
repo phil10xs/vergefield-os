@@ -11,10 +11,16 @@ const TRADE_KEYWORDS: { trade: string; words: string[] }[] = [
       "faucet",
       "pipe",
       "drain",
+      "drainage",
       "blocked",
       "blockage",
       "toilet",
       "sink",
+      "bath",
+      "shower",
+      "cistern",
+      "overflow",
+      "stopcock",
       "water pressure",
       "flood",
     ],
@@ -27,6 +33,11 @@ const TRADE_KEYWORDS: { trade: string; words: string[] }[] = [
       "fuse",
       "fusebox",
       "consumer unit",
+      "bulb",
+      "downlight",
+      "dimmer",
+      "circuit",
+      "meter",
       "no power",
       "power cut",
       "switch",
@@ -49,6 +60,11 @@ const TRADE_KEYWORDS: { trade: string; words: string[] }[] = [
       "drawer",
       "floorboard",
       "skirting",
+      "banister",
+      "architrave",
+      "decking",
+      "fence",
+      "gate",
       "timber",
       "wood",
     ],
@@ -57,11 +73,27 @@ const TRADE_KEYWORDS: { trade: string; words: string[] }[] = [
     trade: "Heating engineer",
     words: [
       "boiler",
+      "boiler pressure",
+      "pilot light",
       "heating",
       "radiator",
+      "cold radiator",
       "hot water",
+      "no hot water",
       "thermostat",
       "cylinder",
+      "pump",
+    ],
+  },
+  {
+    trade: "Gas engineer",
+    words: [
+      "gas",
+      "gas leak",
+      "gas safety",
+      "gas certificate",
+      "carbon monoxide",
+      "cp12",
     ],
   },
   {
@@ -71,18 +103,76 @@ const TRADE_KEYWORDS: { trade: string; words: string[] }[] = [
       "mould",
       "mold",
       "paint",
+      "wallpaper",
+      "gloss",
+      "emulsion",
       "peeling",
       "stain",
-      "plaster",
       "crack",
     ],
   },
   {
-    trade: "Roofer",
-    words: ["roof", "gutter", "slate", "tiles", "chimney", "loft"],
+    trade: "Plasterer",
+    words: [
+      "plaster",
+      "skim",
+      "coving",
+      "dry lining",
+      "partition",
+      "render",
+    ],
   },
-  { trade: "Joiner", words: ["window", "lock", "frame"] },
-  { trade: "Bricklayer", words: ["brick", "mortar", "wall", "pointing"] },
+  {
+    trade: "Roofer",
+    words: [
+      "roof",
+      "flat roof",
+      "gutter",
+      "downpipe",
+      "slate",
+      "tiles",
+      "flashing",
+      "fascia",
+      "soffit",
+      "chimney",
+      "loft",
+    ],
+  },
+  {
+    trade: "Tiler",
+    words: [
+      "tile",
+      "grout",
+      "shower tray",
+      "splashback",
+      "silicone",
+      "bathroom",
+    ],
+  },
+  {
+    trade: "Joiner",
+    words: [
+      "window",
+      "double glazing",
+      "upvc",
+      "sash",
+      "patio door",
+      "lock",
+      "frame",
+    ],
+  },
+  {
+    trade: "Bricklayer",
+    words: ["brick", "mortar", "wall", "pointing", "repointing", "lintel"],
+  },
+  {
+    trade: "Welder",
+    words: ["weld", "metal gate", "railing"],
+  },
+  {
+    trade: "Scaffolder",
+    words: ["scaffold"],
+  },
 ];
 
 function titleCase(trade: string): string {
@@ -92,19 +182,23 @@ function titleCase(trade: string): string {
     .join(" ");
 }
 
+function wordPattern(word: string): RegExp {
+  return new RegExp(`\\b${word}s?\\b`);
+}
+
 export function inferTrade(text: string): string | null {
   const lower = text.toLowerCase();
   if (!lower.trim()) return null;
   const named = [...TRADES].sort((a, b) => b.length - a.length);
   for (const trade of named) {
-    if (new RegExp(`\\b${trade}s?\\b`).test(lower)) {
+    if (wordPattern(trade).test(lower)) {
       return titleCase(trade);
     }
   }
   let best: { trade: string; hits: number } | null = null;
   for (const { trade, words } of TRADE_KEYWORDS) {
     const hits = words.filter((word) =>
-      lower.includes(word.toLowerCase()),
+      wordPattern(word.toLowerCase()).test(lower),
     ).length;
     if (hits > 0 && (!best || hits > best.hits)) {
       best = { trade, hits };

@@ -11,6 +11,7 @@ import {
   saveTranscript,
 } from "@/server/reporting";
 import { groupFilesBySession } from "@/lib/media-rules";
+import { TRADE_OPTIONS } from "@/lib/chat-parse";
 import { analyzeVideo } from "@/server/analyze-video";
 import { saveUpload } from "@/server/media-store";
 
@@ -73,6 +74,13 @@ export async function createPublicRequestAction(
   }
   const priority: "low" | "medium" | "high" =
     formText(formData, "urgency") === "urgent" ? "high" : "medium";
+  const pickedTrade = formText(formData, "trade");
+  const hintedTrade =
+    pickedTrade &&
+    (TRADE_OPTIONS as readonly string[]).includes(pickedTrade) &&
+    pickedTrade !== "Other"
+      ? pickedTrade
+      : null;
   const groups = groupFilesBySession(files);
   const base = {
     requesterName,
@@ -86,12 +94,12 @@ export async function createPublicRequestAction(
     description: note ?? "See photos and video.",
   });
   await saveMediaFiles(created.id, groups[0] ?? [], null);
-  await applyInference(created.id);
+  await applyInference(created.id, hintedTrade);
   await generateReport(created.id, requesterName, { markSubmitted: false });
   for (const group of groups.slice(1)) {
     const sibling = await createPublicRequest({ ...base, description: "" });
     await saveMediaFiles(sibling.id, group, null);
-    await applyInference(sibling.id);
+    await applyInference(sibling.id, hintedTrade);
     await generateReport(sibling.id, requesterName, { markSubmitted: false });
   }
   revalidatePath("/track");

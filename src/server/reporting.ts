@@ -166,7 +166,10 @@ export async function saveTranscript(
     .where(eq(siteMedia.id, mediaId));
 }
 
-export async function applyInference(jobId: string): Promise<void> {
+export async function applyInference(
+  jobId: string,
+  hintedTrade?: string | null,
+): Promise<void> {
   const [row] = await db.select().from(job).where(eq(job.id, jobId));
   if (!row || row.source !== "public") return;
   const media = await db
@@ -174,14 +177,18 @@ export async function applyInference(jobId: string): Promise<void> {
     .from(siteMedia)
     .where(eq(siteMedia.jobId, jobId))
     .orderBy(asc(siteMedia.createdAt));
-  const transcript = media
-    .map((entry) => entry.transcript?.trim())
-    .filter((value): value is string => Boolean(value))
-    .join(" ");
-  const text = [transcript, row.notes?.trim()]
+  const seen = media
+    .map(
+      (entry) =>
+        [entry.transcript?.trim(), entry.visualDescription?.trim()]
+          .filter(Boolean)
+          .join(" "),
+    )
     .filter(Boolean)
-    .join("\n");
-  const trade = inferTrade(text) ?? "General";
+    .join(" ");
+  const text = [seen, row.notes?.trim()].filter(Boolean).join("\n");
+  const trade =
+    hintedTrade && hintedTrade !== "Other" ? hintedTrade : inferTrade(text) ?? "General";
   await db
     .update(job)
     .set({

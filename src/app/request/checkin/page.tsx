@@ -5,6 +5,7 @@ import { createPublicRequestAction } from "@/app/actions/requests";
 import { CapturePicker } from "@/components/capture/capture-picker";
 import { NoteField } from "@/components/request/note-field";
 import { SubmitCheckinButton } from "@/components/request/submit-checkin-button";
+import { TRADE_OPTIONS } from "@/lib/chat-parse";
 import { brand } from "@/brand";
 
 export const metadata: Metadata = { title: "New check-in" };
@@ -94,6 +95,19 @@ export default function CheckinPage() {
             </select>
           </label>
         </div>
+        <label className="block">
+          <span className="mb-1 block text-sm font-semibold">
+            What trade do you need?
+          </span>
+          <select name="trade" className={inputClass} defaultValue="auto">
+            <option value="auto">Auto-detect from my videos</option>
+            {TRADE_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </label>
         <fieldset>
           <legend className="mb-1 px-1 text-sm font-semibold">
             Videos — film the issues

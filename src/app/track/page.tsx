@@ -8,6 +8,8 @@ import { asc } from "drizzle-orm";
 
 export const metadata: Metadata = { title: "Track" };
 
+export const dynamic = "force-dynamic";
+
 export default async function TrackPage() {
   const jobs = await db.select().from(job).orderBy(asc(job.createdAt));
 
