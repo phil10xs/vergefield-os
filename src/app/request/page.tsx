@@ -70,7 +70,7 @@ export default function PublicRequestPage() {
               <img
                 src="/images/checkin-before.jpg"
                 alt="Neglected UK house with mould, bad sink and broken window close-ups"
-                className="aspect-square w-full object-cover"
+                className="h-auto w-full"
               />
               <figcaption className="px-4 py-3">
                 <p className="text-xs font-bold uppercase tracking-wide text-destructive">
@@ -86,7 +86,7 @@ export default function PublicRequestPage() {
               <img
                 src="/images/checkin-after.jpg"
                 alt="Cared-for UK house with fixed wall, sink and window close-ups"
-                className="aspect-square w-full object-cover"
+                className="h-auto w-full"
               />
               <figcaption className="px-4 py-3">
                 <p className="text-xs font-bold uppercase tracking-wide text-[var(--gv-teal-bright)]">

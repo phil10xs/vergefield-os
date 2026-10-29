@@ -55,8 +55,8 @@ export function CheckinProgress({
           {heading}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {brand.engine} is building your Issues snag list and your
-          Home/Property&apos;s Issues &amp; Bills Tracker Board.
+          {brand.engine} is building your Home/Property&apos;s Issues Snag
+          list &amp; Bills Tracker Board.
         </p>
         <ol className="mt-6 space-y-3 text-left">
           {STEPS.map((label, index) => {
