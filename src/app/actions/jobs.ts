@@ -8,12 +8,15 @@ import { eq } from "drizzle-orm";
 import { parseJobMessage, type JobDraft } from "@/lib/chat-parse";
 import type { ReportSectionKey } from "@/lib/checklist-template";
 import {
+  applyInference,
   createPublicRequest,
   ensureChecklist,
   generateReport,
   saveChecklist,
+  saveTranscript,
   triageJob,
 } from "@/server/reporting";
+import { analyzeVideo } from "@/server/analyze-video";
 import { saveUpload } from "@/server/media-store";
 
 export async function parseChatAction(message: string): Promise<JobDraft> {
@@ -73,14 +76,23 @@ export async function saveCaptureAction(formData: FormData): Promise<void> {
   for (const file of files) {
     const bytes = Buffer.from(await file.arrayBuffer());
     const saved = await saveUpload(jobId, file.name, file.type, bytes);
-    await db.insert(siteMedia).values({
-      jobId,
-      kind: saved.kind,
-      filename: saved.filename,
-      mimeType: file.type,
-      sizeBytes: saved.sizeBytes,
-      narration,
-    });
+    const [row] = await db
+      .insert(siteMedia)
+      .values({
+        jobId,
+        kind: saved.kind,
+        filename: saved.filename,
+        mimeType: file.type,
+        sizeBytes: saved.sizeBytes,
+        narration,
+      })
+      .returning();
+    if (row && saved.kind === "video") {
+      const analysis = await analyzeVideo(bytes, file.type);
+      if (analysis) {
+        await saveTranscript(row.id, analysis.transcript, analysis.description);
+      }
+    }
   }
   await db
     .update(job)
@@ -136,39 +148,48 @@ export async function createPublicRequestAction(
   const requesterName = formText(formData, "requesterName");
   const requesterContact = formText(formData, "requesterContact");
   const propertyAddress = formText(formData, "propertyAddress");
-  const description = formText(formData, "description");
-  if (!requesterName || !requesterContact || !propertyAddress || !description) {
-    throw new Error("Name, contact, address, and description are all required");
+  const note = formText(formData, "note");
+  if (!requesterName || !requesterContact || !propertyAddress) {
+    throw new Error("Name, contact, and address are all required");
   }
-  const tradeSelect = formText(formData, "trade") ?? "Other";
-  const trade =
-    tradeSelect === "Other"
-      ? (formText(formData, "otherTrade") ?? "Other")
-      : tradeSelect;
-  const created = await createPublicRequest({
-    requesterName,
-    requesterRole: formText(formData, "requesterRole") ?? "Property owner",
-    requesterContact,
-    propertyAddress,
-    trade,
-    priority: formText(formData, "urgency") === "urgent" ? "high" : "medium",
-    description,
-  });
   const files = formData
     .getAll("media")
     .filter((entry): entry is File => entry instanceof File && entry.size > 0);
+  if (files.length === 0 && !note) {
+    throw new Error("Describe the issue or attach a photo or video");
+  }
+  if (files.filter((file) => file.type.startsWith("video/")).length > 1) {
+    throw new Error("Please attach at most one video — add stills for the rest");
+  }
+  const created = await createPublicRequest({
+    requesterName,
+    requesterContact,
+    propertyAddress,
+    priority: formText(formData, "urgency") === "urgent" ? "high" : "medium",
+    description: note ?? "",
+  });
   for (const file of files) {
     const bytes = Buffer.from(await file.arrayBuffer());
     const saved = await saveUpload(created.id, file.name, file.type, bytes);
-    await db.insert(siteMedia).values({
-      jobId: created.id,
-      kind: saved.kind,
-      filename: saved.filename,
-      mimeType: file.type,
-      sizeBytes: saved.sizeBytes,
-      narration: null,
-    });
+    const [row] = await db
+      .insert(siteMedia)
+      .values({
+        jobId: created.id,
+        kind: saved.kind,
+        filename: saved.filename,
+        mimeType: file.type,
+        sizeBytes: saved.sizeBytes,
+        narration: null,
+      })
+      .returning();
+    if (row && saved.kind === "video") {
+      const analysis = await analyzeVideo(bytes, file.type);
+      if (analysis) {
+        await saveTranscript(row.id, analysis.transcript, analysis.description);
+      }
+    }
   }
+  await applyInference(created.id);
   revalidatePath("/jobs");
   redirect(`/request/thanks?jobId=${created.id}`);
 }
@@ -180,6 +201,18 @@ export async function triageRequestAction(
   const decision = formText(formData, "decision");
   if (!jobId || (decision !== "accept" && decision !== "decline")) {
     throw new Error("Invalid triage");
+  }
+  const title = formText(formData, "title");
+  const trade = formText(formData, "trade");
+  if (title || trade) {
+    await db
+      .update(job)
+      .set({
+        ...(title ? { title } : {}),
+        ...(trade ? { tradesmanTrade: trade } : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(job.id, jobId));
   }
   await triageJob(jobId, decision);
   revalidatePath(`/jobs/${jobId}`);

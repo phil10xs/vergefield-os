@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { Wrench } from "lucide-react";
 import { createPublicRequestAction } from "@/app/actions/jobs";
 import { Button } from "@/components/ui/button";
-import { NarrationField } from "@/components/capture/narration-field";
-import { MediaInputs } from "@/components/capture/media-inputs";
+import { MediaUploadFields } from "@/components/capture/media-upload-fields";
+import { NoteField } from "@/components/request/note-field";
 import { brand } from "@/brand";
-import { TRADE_OPTIONS } from "@/lib/chat-parse";
 
 export const metadata: Metadata = { title: "Request a repair" };
 
@@ -27,8 +26,9 @@ export default function PublicRequestPage() {
             Request a repair
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Owners and tenants: describe the issue, add photos or a video, and
-            the trade team will review it. No account needed.
+            Owners and tenants: leave your name and address, then show the
+            issue — one video up to 20 seconds, plus stills. The trade is
+            detected automatically from your video. No account needed.
           </p>
         </div>
       </div>
@@ -37,35 +37,13 @@ export default function PublicRequestPage() {
         action={createPublicRequestAction}
         className="space-y-4 rounded-2xl border border-border bg-card p-4 sm:p-5"
       >
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block">
-            <span className="mb-1 block text-sm font-semibold">I am a</span>
-            <select name="requesterRole" className={inputClass} defaultValue="Property owner">
-              <option>Property owner</option>
-              <option>Tenant</option>
-              <option>Agent</option>
-            </select>
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-sm font-semibold">Full name</span>
-            <input
-              name="requesterName"
-              required
-              autoComplete="name"
-              placeholder="e.g. Jordan Lee"
-              className={inputClass}
-            />
-          </label>
-        </div>
         <label className="block">
-          <span className="mb-1 block text-sm font-semibold">
-            Phone or email
-          </span>
+          <span className="mb-1 block text-sm font-semibold">Full name</span>
           <input
-            name="requesterContact"
+            name="requesterName"
             required
-            autoComplete="tel"
-            placeholder="How should the team reach you?"
+            autoComplete="name"
+            placeholder="e.g. Jordan Lee"
             className={inputClass}
           />
         </label>
@@ -84,15 +62,15 @@ export default function PublicRequestPage() {
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
             <span className="mb-1 block text-sm font-semibold">
-              Trade needed
+              Phone or email
             </span>
-            <select name="trade" className={inputClass} defaultValue="Plumber">
-              {TRADE_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+            <input
+              name="requesterContact"
+              required
+              autoComplete="tel"
+              placeholder="How should the team reach you?"
+              className={inputClass}
+            />
           </label>
           <label className="block">
             <span className="mb-1 block text-sm font-semibold">How urgent?</span>
@@ -102,35 +80,12 @@ export default function PublicRequestPage() {
             </select>
           </label>
         </div>
-        <label className="block">
-          <span className="mb-1 block text-sm font-semibold">
-            Other trade{" "}
-            <span className="font-normal text-muted-foreground">
-              (only if trade is Other)
-            </span>
-          </span>
-          <input
-            name="otherTrade"
-            placeholder="e.g. Steel fixer"
-            className={inputClass}
-          />
-        </label>
+        <NoteField />
         <div>
           <span className="mb-1 block text-sm font-semibold">
-            Describe the issue
+            Photos or video
           </span>
-          <NarrationField
-            name="description"
-            required
-            placeholder="What is wrong, where, and since when? Type it or tap the mic and talk…"
-          />
-        </div>
-        <div>
-          <span className="mb-1 block text-sm font-semibold">
-            Photos or video{" "}
-            <span className="font-normal text-muted-foreground">(optional)</span>
-          </span>
-          <MediaInputs />
+          <MediaUploadFields />
         </div>
         <Button type="submit" variant="accent" className="w-full">
           Send request

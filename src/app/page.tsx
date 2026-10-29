@@ -67,7 +67,7 @@ export default async function HomePage() {
             <Link href="/request" className="font-semibold text-link hover:underline">
               Public request
             </Link>{" "}
-            — owners and tenants report an issue with photos, video, or voice.
+            — owners and tenants report an issue with photos or video.
           </li>
         </ul>
       </section>

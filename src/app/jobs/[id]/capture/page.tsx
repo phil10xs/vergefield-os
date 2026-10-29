@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 import { saveCaptureAction } from "@/app/actions/jobs";
 import { PageHeader } from "@/components/layout/page-header";
 import { StageSteps } from "@/components/jobs/stage-steps";
-import { NarrationField } from "@/components/capture/narration-field";
-import { MediaInputs } from "@/components/capture/media-inputs";
+import { MediaUploadFields } from "@/components/capture/media-upload-fields";
 import { Button } from "@/components/ui/button";
 import { TRADE_OPTIONS } from "@/lib/chat-parse";
 import { db } from "@/db";
@@ -98,13 +97,18 @@ export default async function CapturePage({
           <legend className="px-1 font-display text-base font-bold tracking-tight">
             Photos and video
           </legend>
-          <MediaInputs required={media.length === 0} />
-          <div className="mt-3">
+          <MediaUploadFields required={media.length === 0} />
+          <label className="mt-3 block">
             <span className="mb-1 block text-sm font-semibold">
-              Spoken narration
+              Narration
             </span>
-            <NarrationField />
-          </div>
+            <textarea
+              name="narration"
+              rows={4}
+              placeholder="Talk through what the camera sees…"
+              className="w-full rounded-xl border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </label>
         </fieldset>
 
         <div className="lg:col-span-2">

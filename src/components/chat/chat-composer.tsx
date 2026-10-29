@@ -5,7 +5,6 @@ import { TRADE_OPTIONS, type JobDraft } from "@/lib/chat-parse";
 import { createJobFromDraft, parseChatAction } from "@/app/actions/jobs";
 import { Button } from "@/components/ui/button";
 import { ErrorText } from "@/components/layout/page-header";
-import { VoiceInputButton } from "@/components/voice/voice-input-button";
 
 interface Message {
   role: "user" | "assistant";
@@ -89,16 +88,9 @@ export function ChatComposer() {
                 void send(input);
               }
             }}
-            placeholder="Describe the job, or tap the mic to speak…"
+            placeholder="Describe the job…"
             className={inputClass}
             aria-label="Describe the job"
-          />
-          <VoiceInputButton
-            onTranscript={(transcript) =>
-              setInput((current) =>
-                current ? `${current} ${transcript}` : transcript,
-              )
-            }
           />
           <Button
             type="button"

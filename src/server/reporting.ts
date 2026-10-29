@@ -5,7 +5,6 @@ import {
   jobNotes,
   siteMedia,
   siteReport,
-  type ChecklistItem,
   type Job,
   type SiteReport,
 } from "@/db/schema";
@@ -15,6 +14,8 @@ import {
   REPORT_SECTIONS,
   type ReportSectionKey,
 } from "@/lib/checklist-template";
+import { buildTitle, inferTrade } from "@/lib/media-inference";
+import { sectionText } from "@/lib/report-sections";
 
 export async function ensureChecklist(jobId: string): Promise<void> {
   const existing = await db
@@ -73,30 +74,6 @@ export async function saveChecklist(
     });
 }
 
-function sectionText(
-  section: ReportSectionKey,
-  note: string | null,
-  items: ChecklistItem[],
-  spoken: string | null,
-): string {
-  const lines: string[] = [];
-  if (note) lines.push(note);
-  const done = items.filter((item) => item.checked).length;
-  lines.push(`Checklist: ${done}/${items.length} complete.`);
-  for (const item of items.filter((item) => !item.checked)) {
-    lines.push(
-      `Follow up: ${item.label}${item.note ? ` — ${item.note}` : ""}`,
-    );
-  }
-  for (const item of items.filter((item) => item.checked && item.note)) {
-    lines.push(`${item.label} — ${item.note}`);
-  }
-  if (section === "site_condition" && spoken) {
-    lines.push(`Spoken site notes: ${spoken}`);
-  }
-  return lines.join("\n");
-}
-
 export async function generateReport(
   jobId: string,
   author: string,
@@ -117,9 +94,9 @@ export async function generateReport(
     .from(siteMedia)
     .where(eq(siteMedia.jobId, jobId))
     .orderBy(asc(siteMedia.createdAt));
-  const spoken =
+  const narration =
     media
-      .map((row) => row.narration?.trim())
+      .map((row) => row.narration?.trim() || row.transcript?.trim())
       .filter((value): value is string => Boolean(value))
       .join(" ")
       .slice(0, 500) || null;
@@ -137,7 +114,7 @@ export async function generateReport(
         "site_condition",
         notes?.siteCondition ?? null,
         bySection("site_condition"),
-        spoken,
+        narration,
       ),
       hazards: sectionText("hazards", notes?.hazards ?? null, bySection("hazards"), null),
       materials: sectionText(
@@ -177,10 +154,8 @@ export async function getLatestReport(
 
 export interface PublicRequestInput {
   requesterName: string;
-  requesterRole: string;
   requesterContact: string;
   propertyAddress: string;
-  trade: string;
   priority: "low" | "medium" | "high";
   description: string;
 }
@@ -193,14 +168,13 @@ export async function createPublicRequest(
   const [row] = await db
     .insert(job)
     .values({
-      title: `${input.trade} request — ${shortAddress}`.slice(0, 120),
+      title: `New request — ${shortAddress}`.slice(0, 120),
       siteName: input.propertyAddress,
       status: "requested",
       priority: input.priority,
-      tradesmanTrade: input.trade,
+      tradesmanTrade: null,
       source: "public",
       requesterName: input.requesterName,
-      requesterRole: input.requesterRole,
       requesterContact: input.requesterContact,
       propertyAddress: input.propertyAddress,
       notes: input.description,
@@ -209,6 +183,46 @@ export async function createPublicRequest(
   if (!row) throw new Error("Request insert failed");
   await ensureChecklist(row.id);
   return row;
+}
+
+export async function saveTranscript(
+  mediaId: string,
+  transcript: string,
+  description: string,
+): Promise<void> {
+  await db
+    .update(siteMedia)
+    .set({
+      transcript: transcript || null,
+      visualDescription: description || null,
+    })
+    .where(eq(siteMedia.id, mediaId));
+}
+
+export async function applyInference(jobId: string): Promise<void> {
+  const [row] = await db.select().from(job).where(eq(job.id, jobId));
+  if (!row || row.source !== "public") return;
+  const media = await db
+    .select()
+    .from(siteMedia)
+    .where(eq(siteMedia.jobId, jobId))
+    .orderBy(asc(siteMedia.createdAt));
+  const transcript = media
+    .map((entry) => entry.transcript?.trim())
+    .filter((value): value is string => Boolean(value))
+    .join(" ");
+  const text = [transcript, row.notes?.trim()]
+    .filter(Boolean)
+    .join("\n");
+  const trade = inferTrade(text) ?? "General";
+  await db
+    .update(job)
+    .set({
+      title: buildTitle(trade, row.propertyAddress ?? row.siteName ?? "", text),
+      tradesmanTrade: trade,
+      updatedAt: new Date(),
+    })
+    .where(eq(job.id, jobId));
 }
 
 export async function triageJob(

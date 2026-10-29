@@ -1,6 +1,6 @@
 export const brand = {
   name: "VergeField OS",
-  tagline: "Chat-to-action FieldOps. Speak, snap, done.",
+  tagline: "Chat-to-action FieldOps. Type, snap, done.",
   description:
     "VergeField OS turns site chat, photos, and video into jobs, dispatches, and reports.",
 } as const;

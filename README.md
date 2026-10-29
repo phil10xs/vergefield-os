@@ -1,7 +1,7 @@
 # VergeField OS
 
 Chat-to-action FieldOps for the Meta AI Global Hackathon (indie track).
-Type or speak a site update — VergeField OS creates and dispatches the job —
+Type a site update — VergeField OS creates and dispatches the job —
 then roll captures into a shareable site photo–video report.
 
 Separate project from GoVerge. It reuses GoVerge's brand tokens, button
@@ -62,20 +62,39 @@ scripts/seed.ts    Demo seed data
 ## Workflow (Step 2)
 
 Jobs → Capture → Checklist → Report. The engineer creates a job by typing
-or speaking into `/jobs/new` (browser speech recognition, no key needed),
-confirms the parsed draft, then on Capture records the tradesman, uploads
-site photos or video, and adds spoken narration. The checklist feeds a
+into `/jobs/new`, confirms the parsed draft, then on Capture records the
+tradesman, uploads site photos or video, and adds written narration.
+The checklist feeds a
 generated report with four sections: Site Condition, Hazards, Materials,
 Next Steps. Uploads stay on this machine under `uploads/`.
 
 ## Public intake (Step 3)
 
-Owners and tenants report issues at `/request` — text or voice description
-plus photos, video, or direct camera capture on mobile. Requests land in the
-trade dashboard with a `Requested` status; the engineer accepts or declines
-from the job detail page (`/jobs/[id]`). The requester gets a reference code
-and a private tracking link (`/request/[id]`).
+Owners and tenants report issues at `/request` — name, address, contact, one
+video up to 20 seconds, plus stills. The trade is detected automatically from
+the video. Requests land in the trade dashboard with a `Requested` status;
+the engineer accepts or declines from the job detail page (`/jobs/[id]`).
+The requester gets a reference code and a private tracking link
+(`/request/[id]`).
 
 Both the trade dashboard and the public pages are mobile-first: single-column
 forms, 44px touch targets, and file inputs that open the camera (still or
 video) on phones while degrading to pickers on desktop.
+
+## Meta video understanding (Step 4)
+
+Each uploaded video is sent to Meta (Muse Spark 1.2 video understanding),
+which returns a speech transcript and a short visual description. The title
+and trade are inferred from the transcript plus the requester's note; the
+tradesman confirms or corrects both when accepting. Photos skip analysis.
+
+Setup: add your Meta Model API key to `.env.local`:
+
+```bash
+META_MODEL_API_KEY=LLM_...
+```
+
+Without a key (or if analysis fails), requests still work end to end —
+transcripts show as unavailable and the team uses the note plus the video's
+own voice. Duration (20 s) and the one-video rule are enforced in the browser
+before submit, with a server-side one-video backstop.

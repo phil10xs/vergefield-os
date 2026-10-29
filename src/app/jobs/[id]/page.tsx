@@ -70,10 +70,33 @@ export default async function JobDetailPage({
           <h2 className="font-display text-base font-bold tracking-tight">
             New public request — accept or decline
           </h2>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-            <form action={triageRequestAction}>
+          <div className="mt-3 flex flex-col gap-2">
+            <form action={triageRequestAction} className="space-y-3">
               <input type="hidden" name="jobId" value={jobRow.id} />
               <input type="hidden" name="decision" value="accept" />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-1 block text-sm font-semibold">
+                    Confirm title
+                  </span>
+                  <input
+                    name="title"
+                    defaultValue={jobRow.title}
+                    className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-sm font-semibold">
+                    Confirm trade
+                  </span>
+                  <input
+                    name="trade"
+                    defaultValue={jobRow.tradesmanTrade ?? ""}
+                    placeholder="e.g. Plumber"
+                    className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </label>
+              </div>
               <Button type="submit" variant="accent" className="w-full sm:w-auto">
                 Accept into schedule
               </Button>
@@ -134,7 +157,6 @@ export default async function JobDetailPage({
             </h2>
             <dl className="mt-3 grid gap-3 sm:grid-cols-2">
               <Fact label="Name" value={jobRow.requesterName ?? "—"} />
-              <Fact label="Role" value={jobRow.requesterRole ?? "—"} />
               <Fact label="Contact" value={jobRow.requesterContact ?? "—"} />
               <Fact label="Address" value={jobRow.propertyAddress ?? "—"} />
             </dl>
@@ -167,6 +189,39 @@ export default async function JobDetailPage({
           </div>
         </section>
       </div>
+
+      {media.some((row) => row.transcript || row.visualDescription) ? (
+        <section aria-label="Video analysis" className="mt-6">
+          <h2 className="mb-3 font-display text-lg font-bold tracking-tight">
+            What Meta saw
+          </h2>
+          <div className="space-y-3">
+            {media
+              .filter((row) => row.transcript || row.visualDescription)
+              .map((row) => (
+                <div
+                  key={row.id}
+                  className="rounded-2xl border border-border bg-card p-4 text-sm leading-relaxed"
+                >
+                  {row.transcript ? (
+                    <p className="whitespace-pre-line">
+                      <strong className="font-semibold">Heard: </strong>
+                      {row.transcript}
+                    </p>
+                  ) : null}
+                  {row.visualDescription ? (
+                    <p className="mt-2 whitespace-pre-line text-muted-foreground">
+                      <strong className="font-semibold text-foreground">
+                        Seen:{" "}
+                      </strong>
+                      {row.visualDescription}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+          </div>
+        </section>
+      ) : null}
 
       <section aria-label="Original captures" className="mt-6">
         <h2 className="mb-3 font-display text-lg font-bold tracking-tight">
