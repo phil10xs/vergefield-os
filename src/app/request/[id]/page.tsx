@@ -34,9 +34,9 @@ function sectionLabel(key: string): string {
 }
 
 function visitStatus(sessions: Job[]): string {
-  if (sessions.length > 0 && sessions.every((row) => row.status === "resolved"))
-    return "resolved";
-  const order = ["in_progress", "submitted", "planned", "requested"];
+  if (sessions.length > 0 && sessions.every((row) => row.status === "paid"))
+    return "paid";
+  const order = ["in_progress", "completed", "requested"];
   for (const status of order) {
     if (sessions.some((row) => row.status === status)) return status;
   }
@@ -188,7 +188,9 @@ export default async function PublicTrackPage({
         </summary>
         <ul className="space-y-2.5 border-t border-border px-4 py-4">
           {views.map((view, index) => {
-            const done = view.session.status === "resolved";
+            const done =
+              view.session.status === "completed" ||
+              view.session.status === "paid";
             return (
               <li key={view.session.id} className="flex items-start gap-3">
                 <span
@@ -338,11 +340,11 @@ export default async function PublicTrackPage({
       </div>
 
       <section
-        aria-label="Issues and Bill Tracker board"
+        aria-label="Issues and Bills Tracker Board"
         className="mt-6 rounded-2xl border border-border bg-card p-4"
       >
         <h2 className="font-display text-base font-bold tracking-tight">
-          Your Issues &amp; Bill Tracker board
+          Your Home/Property&apos;s Issues &amp; Bills Tracker Board
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           See every issue from this property laid out on your tracker board.
@@ -351,9 +353,9 @@ export default async function PublicTrackPage({
         <div className="mt-3">
           <Link
             href={`/board?property=${encodeURIComponent(address)}`}
-            className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-accent-foreground sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-accent px-4 py-2 text-center text-sm font-semibold text-accent-foreground sm:w-auto"
           >
-            View my Issues &amp; Bill Tracker board
+            View my Home/Property&apos;s Issues &amp; Bills Tracker Board
           </Link>
         </div>
       </section>

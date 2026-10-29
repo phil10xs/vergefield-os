@@ -99,7 +99,7 @@ export async function generateReport(
   if (options.markSubmitted !== false) {
     await db
       .update(job)
-      .set({ status: "submitted", updatedAt: new Date() })
+      .set({ status: "completed", updatedAt: new Date() })
       .where(eq(job.id, jobId));
   }
   return report;
@@ -213,10 +213,9 @@ export async function getPublicJob(jobId: string): Promise<Job | undefined> {
 
 const DEMO_STATUSES = [
   "requested",
-  "planned",
   "in_progress",
-  "submitted",
-  "resolved",
+  "completed",
+  "paid",
   "cancelled",
 ] as const;
 
@@ -227,6 +226,36 @@ export async function setJobStatus(jobId: string, status: string): Promise<void>
   await db
     .update(job)
     .set({ status, updatedAt: new Date() })
+    .where(eq(job.id, jobId));
+}
+
+const BOARD_FLOW = ["requested", "in_progress", "completed", "paid"] as const;
+
+export async function stepJobStatus(
+  jobId: string,
+  direction: "next" | "prev",
+): Promise<void> {
+  const [row] = await db.select().from(job).where(eq(job.id, jobId));
+  if (!row) throw new Error("Job not found");
+  const at = (BOARD_FLOW as readonly string[]).indexOf(row.status);
+  if (at === -1) {
+    await setJobStatus(jobId, "requested");
+    return;
+  }
+  const next = at + (direction === "next" ? 1 : -1);
+  if (next < 0 || next >= BOARD_FLOW.length) return;
+  await setJobStatus(jobId, BOARD_FLOW[next]!);
+}
+
+export async function markPaid(jobId: string): Promise<void> {
+  const [row] = await db.select().from(job).where(eq(job.id, jobId));
+  if (!row) throw new Error("Job not found");
+  if (row.status !== "completed") {
+    throw new Error("Only completed issues can be paid");
+  }
+  await db
+    .update(job)
+    .set({ status: "paid", paymentStatus: "sent", updatedAt: new Date() })
     .where(eq(job.id, jobId));
 }
 

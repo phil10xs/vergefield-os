@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import { Link2Off } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Public-repo placeholder. The real magic-link Issues & Bill Tracker board lives only on
+// Public-repo placeholder. The real magic-link Issues & Bills Tracker Board lives only on
 // the local internal-VergeSnag branch and is never pushed.
 
-export const metadata: Metadata = { title: "Issues & Bill Tracker board" };
+export const metadata: Metadata = { title: "Issues & Bills Tracker Board" };
 
 export default async function PublicBoardPage({
   params,
@@ -25,7 +25,7 @@ export default async function PublicBoardPage({
           Board not in this build
         </h1>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          Magic-link Issues &amp; Bill Tracker boards ship in the internal build only. Check in
+          Magic-link Issues &amp; Bills Tracker Boards ship in the internal build only. Check in
           below to start a visit — no account needed.
         </p>
         <div className="mt-5">

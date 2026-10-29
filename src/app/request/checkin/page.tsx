@@ -30,7 +30,8 @@ export default function CheckinPage() {
         </h1>
         <p className="mt-1 max-w-md text-sm text-muted-foreground">
           Leave your details, film what you see, and {brand.engine} builds
-          your Issues snag list and Issues &amp; Bill Tracker board.
+          your Issues snag list and your Home/Property&apos;s Issues &amp;
+          Bills Tracker Board.
         </p>
       </div>
 

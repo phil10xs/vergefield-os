@@ -11,7 +11,7 @@ export const job = pgTable("job", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   siteName: text("site_name"),
-  status: text("status").notNull().default("planned"),
+  status: text("status").notNull().default("requested"),
   priority: text("priority").notNull().default("medium"),
   assignee: text("assignee"),
   tradesmanName: text("tradesman_name"),

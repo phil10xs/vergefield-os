@@ -8,7 +8,7 @@ const STEPS = [
   "Uploading your videos",
   "Listening to what you filmed",
   "Detecting the trade",
-  "Building your report, Issues snag list and Issues & Bill Tracker board",
+  "Building your report, Issues snag list and Issues & Bills Tracker Board",
 ];
 
 const STEP_MS = 2800;
@@ -55,7 +55,8 @@ export function CheckinProgress({
           {heading}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {brand.engine} is building your Issues snag list and Issues &amp; Bill Tracker board.
+          {brand.engine} is building your Issues snag list and your
+          Home/Property&apos;s Issues &amp; Bills Tracker Board.
         </p>
         <ol className="mt-6 space-y-3 text-left">
           {STEPS.map((label, index) => {

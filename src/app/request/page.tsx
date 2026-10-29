@@ -34,7 +34,7 @@ const HOW_IT_WORKS = [
     body: "VergeSnag AI analyses your clips and lists every issue with its trade.",
   },
   {
-    title: "Track on your Issues & Bill Tracker board",
+    title: "Track on Your Home/Property's Issues & Bills Tracker Board",
     body: "follow each issue till it's fixed — bills matched on use.",
   },
 ];
@@ -145,7 +145,8 @@ export default function PublicRequestPage() {
         </h2>
         <p className="mt-1 text-sm opacity-90">
           Film a 20-second check-in and {brand.engine} builds your Issues snag list
-          and Issues &amp; Bill Tracker board for your home/property fixes. Free to try, no
+          and your Home/Property&apos;s Issues &amp; Bills Tracker Board for
+          your home/property fixes. Free to try, no
           account needed.
         </p>
         <Link href="/request/checkin" className="mt-4 inline-block">

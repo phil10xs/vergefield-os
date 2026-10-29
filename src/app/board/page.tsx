@@ -1,32 +1,36 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { KanbanSquare } from "lucide-react";
+import { CheckCircle2, KanbanSquare } from "lucide-react";
 import { ListHero } from "@/components/layout/list-overview";
 import {
   JobPaymentBadge,
   JobStatusBadge,
 } from "@/components/ui/status-badge";
+import { Button } from "@/components/ui/button";
+import { ReportCelebration } from "@/components/request/report-celebration";
+import { markPaidAction, stepJobStatusAction } from "@/app/actions/requests";
 import { sessionAddress } from "@/lib/sessions";
 import { db } from "@/db";
 import { job } from "@/db/schema";
 import { asc, eq } from "drizzle-orm";
 
-export const metadata: Metadata = { title: "Issues & Bill Tracker board" };
+export const metadata: Metadata = {
+  title: "Your Home/Property's Issues & Bills Tracker Board",
+};
 
 const COLUMNS = [
   { key: "requested", label: "Requested" },
-  { key: "planned", label: "Planned" },
   { key: "in_progress", label: "In progress" },
-  { key: "submitted", label: "Submitted" },
-  { key: "resolved", label: "Resolved" },
+  { key: "completed", label: "Completed" },
+  { key: "paid", label: "Paid" },
 ] as const;
 
 export default async function BoardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ property?: string }>;
+  searchParams: Promise<{ property?: string; paid?: string }>;
 }) {
-  const { property } = await searchParams;
+  const { property, paid } = await searchParams;
 
   if (!property) {
     const rows = await db
@@ -44,8 +48,8 @@ export default async function BoardPage({
     return (
       <main className="mx-auto w-full max-w-xl px-[var(--app-gutter)] py-8">
         <ListHero
-          title="Issues & Bill Tracker board"
-          description="Pick a property to see its tracker board."
+          title="Your Home/Property's Issues & Bills Tracker Board"
+          description="Pick a property to see its board."
           icon={KanbanSquare}
           count={addresses.length}
           countLabel={addresses.length === 1 ? "property" : "properties"}
@@ -64,6 +68,14 @@ export default async function BoardPage({
             </li>
           ))}
         </ul>
+        <p className="mt-4 text-center text-sm">
+          <Link
+            href="/request"
+            className="font-semibold text-link hover:underline"
+          >
+            ← Back to check-in
+          </Link>
+        </p>
       </main>
     );
   }
@@ -74,18 +86,37 @@ export default async function BoardPage({
     .where(eq(job.propertyAddress, property))
     .orderBy(asc(job.createdAt));
   const title = jobs.length > 0 ? sessionAddress(jobs[0]!) : property;
+  const parked = jobs.filter(
+    (entry) => !COLUMNS.some((column) => column.key === entry.status),
+  );
 
   return (
     <main className="mx-auto w-full max-w-[var(--app-page-max)] px-[var(--app-gutter)] py-8">
+      <ReportCelebration active={paid === "1"} />
       <ListHero
         title={title}
-        description="Your read-only Issues & Bill Tracker board for this property."
+        description="Your Home/Property's Issues & Bills Tracker Board for this property."
         icon={KanbanSquare}
         count={jobs.length}
         countLabel={jobs.length === 1 ? "session" : "sessions"}
         actionHref="/request"
         actionLabel="New check-in"
       />
+
+      {paid === "1" ? (
+        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
+          <CheckCircle2
+            className="mt-0.5 h-5 w-5 shrink-0 text-[var(--gv-teal-bright)]"
+            aria-hidden
+          />
+          <div className="text-sm">
+            <p className="font-semibold">Your payment has been confirmed.</p>
+            <p className="mt-0.5 text-muted-foreground">
+              The issue now shows as Paid on the board.
+            </p>
+          </div>
+        </div>
+      ) : null}
 
       <div className="flex snap-x gap-4 overflow-x-auto pb-2">
         {COLUMNS.map((column) => {
@@ -130,6 +161,54 @@ export default async function BoardPage({
                         amountPence={card.paymentAmount}
                       />
                     </p>
+                    <div className="mt-2 flex gap-2">
+                      {card.status !== "requested" ? (
+                        <form action={stepJobStatusAction}>
+                          <input type="hidden" name="jobId" value={card.id} />
+                          <input type="hidden" name="direction" value="prev" />
+                          <Button
+                            type="submit"
+                            size="sm"
+                            variant="outline"
+                            aria-label={`Move ${card.title} back`}
+                          >
+                            ‹
+                          </Button>
+                        </form>
+                      ) : null}
+                      {card.status === "completed" ? (
+                        <form action={markPaidAction} className="flex-1">
+                          <input type="hidden" name="jobId" value={card.id} />
+                          <input
+                            type="hidden"
+                            name="property"
+                            value={property}
+                          />
+                          <Button
+                            type="submit"
+                            size="sm"
+                            variant="accent"
+                            className="w-full"
+                          >
+                            Pay Tradesman
+                          </Button>
+                        </form>
+                      ) : card.status === "paid" ? null : (
+                        <form action={stepJobStatusAction} className="flex-1">
+                          <input type="hidden" name="jobId" value={card.id} />
+                          <input type="hidden" name="direction" value="next" />
+                          <Button
+                            type="submit"
+                            size="sm"
+                            variant="outline"
+                            className="w-full"
+                            aria-label={`Move ${card.title} forward`}
+                          >
+                            ›
+                          </Button>
+                        </form>
+                      )}
+                    </div>
                   </article>
                 ))}
                 {cards.length === 0 ? (
@@ -142,8 +221,16 @@ export default async function BoardPage({
           );
         })}
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">
-        Read-only view — statuses update from the visit report.
+      {parked.length > 0 ? (
+        <p className="mt-3 text-xs text-muted-foreground">
+          {parked.length} parked outside the board (
+          {[...new Set(parked.map((entry) => entry.status))].join(", ")}).
+        </p>
+      ) : null}
+      <p className="mt-4 text-center text-sm">
+        <Link href="/request" className="font-semibold text-link hover:underline">
+          ← Back to check-in
+        </Link>
       </p>
     </main>
   );

@@ -8,7 +8,9 @@ import {
   applyInference,
   createPublicRequest,
   generateReport,
+  markPaid,
   saveVideoAnalysis,
+  stepJobStatus,
 } from "@/server/reporting";
 import { groupFilesBySession } from "@/lib/media-rules";
 import { TRADE_OPTIONS } from "@/lib/chat-parse";
@@ -110,4 +112,27 @@ export async function createPublicRequestAction(
   revalidatePath("/track");
   revalidatePath("/board");
   redirect(`/request/${created.id}?new=1`);
+}
+
+export async function stepJobStatusAction(
+  formData: FormData,
+): Promise<void> {
+  const jobId = formText(formData, "jobId");
+  const direction = formText(formData, "direction");
+  if (!jobId || (direction !== "next" && direction !== "prev")) {
+    throw new Error("Job and direction are required");
+  }
+  await stepJobStatus(jobId, direction);
+  revalidatePath("/track");
+  revalidatePath("/board");
+}
+
+export async function markPaidAction(formData: FormData): Promise<void> {
+  const jobId = formText(formData, "jobId");
+  const property = formText(formData, "property") ?? "";
+  if (!jobId) throw new Error("Job is required");
+  await markPaid(jobId);
+  revalidatePath("/track");
+  revalidatePath("/board");
+  redirect(`/board?property=${encodeURIComponent(property)}&paid=1`);
 }

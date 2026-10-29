@@ -47,6 +47,7 @@ const jobStatusTone: Record<string, Tone> = {
   submitted: "warning",
   approved: "success",
   completed: "success",
+  paid: "success",
   blocked: "danger",
   rescheduled: "warning",
   rejected: "danger",

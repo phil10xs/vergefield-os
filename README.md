@@ -70,7 +70,7 @@ property from `/request`: name, contact, address, then one video per issue
 session — trade auto-detected, reference issued — grouped under its visit on
 the visit report (`/request/[id]`), with an Issues snag list and a Meta Spark
 analysis block. `/track` holds every property's Issues snag list; from the
-report, "View my Issues & Bill Tracker board" opens the property's read-only
+report, "View my Issues & Bills Tracker Board" opens the property's read-only
 board at `/board`. Uploads stay on this machine under `uploads/`.
 
 Every screen is mobile-first and adaptive across phone, tablet, and laptop:
@@ -108,7 +108,7 @@ private full build:
   dashboard.
 
 Everything else — check-in, visit reports, Issues snag list, read-only
-Issues & Bill Tracker board — runs fully from this branch.
+Issues & Bills Tracker Board — runs fully from this branch.
 
 ## Secrets rule
 
@@ -131,5 +131,5 @@ pnpm dev       # http://localhost:3002
 2. Visit report at `/request/[id]` — sessions, Issues snag list, Meta Spark
    analysis.
 3. Snag list at `/track` — every property's visits and sessions.
-4. Issues & Bill Tracker board from the report — the property's read-only
+4. Issues & Bills Tracker Board from the report — the property's read-only
    board.
