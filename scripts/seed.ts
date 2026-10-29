@@ -1,12 +1,11 @@
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { randomBytes } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { config as loadEnv } from "dotenv";
 import { boardToken, job, siteMedia, siteReport } from "../src/db/schema";
-import { BOARD_TOKEN_TTL_MS } from "../src/lib/board-token";
+import fixture from "./demo-fixture.json";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,27 +22,50 @@ const PIXEL = Buffer.from(
   "base64",
 );
 
-async function seedPhoto(
-  db: ReturnType<typeof drizzle>,
-  params: {
-    jobId: string;
-    name: string;
-    transcript?: string;
-    visualDescription?: string;
-  },
-): Promise<void> {
-  const dir = join(__dirname, "../uploads", params.jobId);
-  await mkdir(dir, { recursive: true });
-  await writeFile(join(dir, params.name), PIXEL);
-  await db.insert(siteMedia).values({
-    jobId: params.jobId,
-    kind: "photo",
-    filename: params.name,
-    mimeType: "image/png",
-    sizeBytes: PIXEL.length,
-    transcript: params.transcript ?? null,
-    visualDescription: params.visualDescription ?? null,
-  });
+interface FixtureJob {
+  id: string;
+  title: string;
+  site_name: string | null;
+  status: string;
+  priority: string;
+  assignee: string | null;
+  tradesman_name: string | null;
+  tradesman_trade: string | null;
+  payment_status: string | null;
+  payment_amount: number | null;
+  source: string;
+  requester_name: string | null;
+  requester_contact: string | null;
+  business_name: string | null;
+  property_address: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface FixtureReport {
+  id: string;
+  job_id: string;
+  author: string;
+  notes: string | null;
+  site_condition: string | null;
+  hazards: string | null;
+  materials: string | null;
+  next_steps: string | null;
+  media_urls: string[];
+  created_at: string;
+}
+
+interface FixtureMedia {
+  id: string;
+  job_id: string;
+  kind: string;
+  filename: string;
+  mime_type: string;
+  narration: string | null;
+  transcript: string | null;
+  visual_description: string | null;
+  created_at: string;
 }
 
 async function main() {
@@ -55,189 +77,72 @@ async function main() {
   await db.delete(boardToken);
   await db.delete(job);
 
-  const [firstFit, snagging, commissioning] = await db
-    .insert(job)
-    .values([
-      {
-        title: "Electrician request — Hulme Point: second-fix electrics",
-        siteName: "Hulme Point",
-        status: "in_progress",
-        priority: "high",
-        assignee: "A. Mensah",
-        tradesmanName: "A. Mensah",
-        tradesmanTrade: "Electrician",
-        paymentStatus: "due",
-        paymentAmount: 18000,
-        source: "public",
-        requesterName: "Priya Nair",
-        requesterContact: "priya@example.com",
-        propertyAddress: "Hulme Point, Manchester",
-        notes: "Consumer unit and socket fronts outstanding.",
-      },
-      {
-        title: "General request — Hulme Point: snagging walk",
-        siteName: "Hulme Point",
-        status: "planned",
-        priority: "medium",
-        assignee: "J. Whitfield",
-        source: "public",
-        requesterName: "Priya Nair",
-        requesterContact: "priya@example.com",
-        propertyAddress: "Hulme Point, Manchester",
-        notes: "Client walkthrough Friday 10:00.",
-      },
-      {
-        title: "General request — Salford Quays: MVHR commissioning",
-        siteName: "Salford Quays",
-        status: "planned",
-        priority: "medium",
-        assignee: null,
-        source: "public",
-        requesterName: "Tom Becker",
-        requesterContact: "tom@example.com",
-        propertyAddress: "Salford Quays, Manchester",
-        notes: "Awaiting ductwork sign-off.",
-      },
-    ])
-    .returning();
+  for (const entry of fixture.jobs as FixtureJob[]) {
+    await db.insert(job).values({
+      id: entry.id,
+      title: entry.title,
+      siteName: entry.site_name,
+      status: entry.status,
+      priority: entry.priority as "low" | "medium" | "high",
+      assignee: entry.assignee,
+      tradesmanName: entry.tradesman_name,
+      tradesmanTrade: entry.tradesman_trade,
+      paymentStatus: entry.payment_status,
+      paymentAmount: entry.payment_amount,
+      source: entry.source,
+      requesterName: entry.requester_name,
+      requesterContact: entry.requester_contact,
+      businessName: entry.business_name,
+      propertyAddress: entry.property_address,
+      notes: entry.notes,
+      createdAt: new Date(entry.created_at),
+      updatedAt: new Date(entry.updated_at),
+    });
+  }
 
-  if (firstFit) {
+  for (const entry of fixture.reports as FixtureReport[]) {
     await db.insert(siteReport).values({
-      jobId: firstFit.id,
-      author: "A. Mensah",
-      notes:
-        "First floor wired. Two socket fronts back-ordered; photos attached on site.",
-      mediaUrls: [],
+      id: entry.id,
+      jobId: entry.job_id,
+      author: entry.author,
+      notes: entry.notes,
+      siteCondition: entry.site_condition,
+      hazards: entry.hazards,
+      materials: entry.materials,
+      nextSteps: entry.next_steps,
+      mediaUrls: entry.media_urls,
+      createdAt: new Date(entry.created_at),
     });
   }
 
-  const address = "14 Rosebank Road, Manchester";
-  const [leakingTap] = await db
-    .insert(job)
-    .values({
-      title: "Plumber request — M14: Leaking tap",
-      siteName: address,
-      status: "requested",
-      priority: "high",
-      tradesmanTrade: "Plumber",
-      source: "public",
-      requesterName: "Jordan Lee",
-      requesterContact: "07123 888888",
-      propertyAddress: address,
-      notes: "Leaking tap",
-    })
-    .returning();
-
-  const [slippedSlate] = await db
-    .insert(job)
-    .values({
-      title: "Roofer request — 14 Rosebank Road: Slipped slate",
-      siteName: address,
-      status: "submitted",
-      priority: "medium",
-      assignee: "D. Okafor",
-      tradesmanName: "D. Okafor",
-      tradesmanTrade: "Roofer",
-      source: "public",
-      requesterName: "Jordan Lee",
-      requesterContact: "07123 888888",
-      propertyAddress: address,
-      paymentStatus: "due",
-      paymentAmount: 8500,
-      notes: "Slipped slate above the front path",
-    })
-    .returning();
-
-  const [fixedLight] = await db
-    .insert(job)
-    .values({
-      title: "Electrician request — 14 Rosebank Road: Flickering hallway light",
-      siteName: address,
-      status: "resolved",
-      priority: "medium",
-      assignee: "R. Ojo",
-      tradesmanName: "R. Ojo",
-      tradesmanTrade: "Electrician",
-      source: "public",
-      requesterName: "Jordan Lee",
-      requesterContact: "07123 888888",
-      propertyAddress: address,
-      paymentStatus: "sent",
-      paymentAmount: 12000,
-      notes: "Flickering hallway light",
-    })
-    .returning();
-
-  if (leakingTap) {
-    await db.insert(siteReport).values({
-      jobId: leakingTap.id,
-      author: "Jordan Lee",
-      notes: "Leaking tap — Plumber detected from the check-in video.",
-      siteCondition: "Kitchen tap drips steadily into the sink; washer worn.",
-      hazards: "Water pooling inside the under-sink cupboard — keep cleaning products clear.",
-      materials: "Replacement washer and PTFE tape.",
-      nextSteps: "Plumber visit booked; isolate the supply if dripping worsens.",
-      mediaUrls: [],
+  for (const entry of fixture.media as FixtureMedia[]) {
+    const dir = join(__dirname, "../uploads", entry.job_id);
+    await mkdir(dir, { recursive: true });
+    await writeFile(join(dir, entry.filename), PIXEL);
+    await db.insert(siteMedia).values({
+      id: entry.id,
+      jobId: entry.job_id,
+      kind: entry.kind as "photo" | "video",
+      filename: entry.filename,
+      mimeType: entry.mime_type,
+      sizeBytes: PIXEL.length,
+      narration: entry.narration,
+      transcript: entry.transcript,
+      visualDescription: entry.visual_description,
+      createdAt: new Date(entry.created_at),
     });
-    await seedPhoto(db, {
-      jobId: leakingTap.id,
-      name: "seed-tap-1.png",
-      transcript:
-        "There's water dripping under the kitchen sink and the tap won't stop running.",
-      visualDescription: "Close-up of a kitchen tap with water beading at the spout.",
-    });
-    await seedPhoto(db, { jobId: leakingTap.id, name: "seed-tap-2.png" });
   }
 
-  if (slippedSlate) {
-    await db.insert(siteReport).values({
-      jobId: slippedSlate.id,
-      author: "Jordan Lee",
-      notes: "Slipped slate above the front path — roofer assigned.",
-      siteCondition: "One slate slipped on the front slope; felt exposed.",
-      hazards: "Loose slate above the walkway — keep clear until secured.",
-      materials: "Replacement slate, clips, ladder access.",
-      nextSteps: "Roofer scheduled; invoice due on completion.",
-      mediaUrls: [],
-    });
-    await seedPhoto(db, { jobId: slippedSlate.id, name: "seed-slate-1.png" });
-  }
-
-  if (fixedLight) {
-    await db.insert(siteReport).values({
-      jobId: fixedLight.id,
-      author: "R. Ojo",
-      notes: "Flickering hallway light — fitting replaced and tested.",
-      siteCondition: "Hallway light fitting replaced; steady on test.",
-      hazards: "None outstanding — circuit tested safe.",
-      materials: "Replacement LED fitting (supplied).",
-      nextSteps: "Resolved — paid £120, receipt sent.",
-      mediaUrls: [],
-    });
-    await seedPhoto(db, { jobId: fixedLight.id, name: "seed-light-1.png" });
-  }
-
-  let boardUrl = "";
-  if (leakingTap) {
-    const token = randomBytes(32).toString("hex");
-    await db.insert(boardToken).values({
-      token,
-      jobId: leakingTap.id,
-      email: "landlord@example.com",
-      expiresAt: new Date(Date.now() + BOARD_TOKEN_TTL_MS),
-    });
-    boardUrl = `http://localhost:3002/b/${token}`;
-  }
-
+  const jobs = fixture.jobs as FixtureJob[];
+  const media = fixture.media as FixtureMedia[];
+  const withMedia = media.length > 0 ? media[0]?.job_id : jobs[0]?.id;
   console.log(
-    `Seeded ${[firstFit, snagging, commissioning].filter(Boolean).length} portfolio check-ins + 3-session home visit + reports + photos.`,
+    `Seeded ${jobs.length} demo check-ins + ${fixture.reports.length} reports + ${media.length} mocked captures from demo-fixture.json.`,
   );
-  if (leakingTap) {
-    console.log(`Visit report: http://localhost:3002/request/${leakingTap.id}`);
+  if (withMedia) {
+    console.log(`Visit report: http://localhost:3002/request/${withMedia}`);
   }
-  if (boardUrl) {
-    console.log(`Demo board: ${boardUrl}`);
-  }
+  console.log("Snag list: http://localhost:3002/track");
   await client.end();
 }
 

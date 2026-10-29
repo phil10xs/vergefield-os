@@ -75,9 +75,7 @@ this machine under `uploads/`.
 
 Requesters get their property's board without an account: from the visit
 report they request a magic link by email and open a read-only kanban at
-`/b/[token]`, expiring after 7 days. (The old internal trade dashboard under
-`/jobs` was removed — the check-in flow already captures, and `/track`
-already holds the issues.)
+`/b/[token]`, expiring after 7 days.
 
 Every screen is mobile-first and adaptive across phone, tablet, and laptop:
 single-column forms, 44px touch targets, camera capture on phones degrading

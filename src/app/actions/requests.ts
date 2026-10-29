@@ -8,12 +8,8 @@ import {
   applyInference,
   createPublicRequest,
   generateReport,
-  markPaymentDue,
-  recordPayment,
   saveTranscript,
-  setJobStatus,
 } from "@/server/reporting";
-import { requestBoardLink } from "@/server/board-access";
 import { groupFilesBySession } from "@/lib/media-rules";
 import { analyzeVideo } from "@/server/analyze-video";
 import { saveUpload } from "@/server/media-store";
@@ -99,44 +95,6 @@ export async function createPublicRequestAction(
     await generateReport(sibling.id, requesterName, { markSubmitted: false });
   }
   revalidatePath("/track");
+  revalidatePath("/board");
   redirect(`/request/${created.id}?new=1`);
-}
-
-export async function setJobStatusAction(
-  formData: FormData,
-): Promise<void> {
-  const jobId = formText(formData, "jobId");
-  const status = formText(formData, "status");
-  if (!jobId || !status) throw new Error("Job and status are required");
-  await setJobStatus(jobId, status);
-  revalidatePath("/track");
-}
-
-export async function requestBoardLinkAction(
-  jobId: string,
-  email: string,
-): Promise<{ url: string; emailed: boolean }> {
-  return requestBoardLink(jobId, email);
-}
-
-export async function savePaymentDecisionAction(
-  formData: FormData,
-): Promise<void> {
-  const jobId = formText(formData, "jobId");
-  const decision = formText(formData, "decision");
-  if (!jobId || (decision !== "due" && decision !== "sent")) {
-    throw new Error("Job and decision are required");
-  }
-  const raw = formText(formData, "amount");
-  if (decision === "sent") {
-    if (!raw) throw new Error("Job and amount are required");
-    const pounds = Number(raw);
-    if (!Number.isFinite(pounds) || pounds <= 0) {
-      throw new Error("Enter a valid amount");
-    }
-    await recordPayment(jobId, Math.round(pounds * 100));
-  } else {
-    await markPaymentDue(jobId, raw ? Math.round(Number(raw) * 100) : null);
-  }
-  revalidatePath("/track");
 }

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Check, CheckCircle2, ChevronDown } from "lucide-react";
@@ -5,7 +6,7 @@ import {
   JobPaymentBadge,
   JobStatusBadge,
 } from "@/components/ui/status-badge";
-import { BoardLinkRequest } from "@/components/request/board-link-request";
+import { ReportCelebration } from "@/components/request/report-celebration";
 import { REPORT_SECTIONS } from "@/lib/checklist-template";
 import {
   condenseTranscript,
@@ -133,6 +134,7 @@ export default async function PublicTrackPage({
 
   return (
     <main className="mx-auto w-full max-w-2xl px-[var(--app-gutter)] py-8">
+      <ReportCelebration active={fresh === "1"} />
       {fresh === "1" ? (
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
           <CheckCircle2
@@ -141,11 +143,11 @@ export default async function PublicTrackPage({
           />
           <div className="text-sm">
             <p className="font-semibold">
-              Check-in received — reference {reference}
+              Analysis complete — snag list ready · {reference}
             </p>
             <p className="mt-0.5 text-muted-foreground">
-              Bookmark this page — it is your private receipt. The trade team
-              reviews every check-in in turn, urgent issues first.
+              Your clips are analysed and every issue is listed below.
+              Bookmark this page — it is your private receipt.
             </p>
           </div>
         </div>
@@ -336,21 +338,23 @@ export default async function PublicTrackPage({
       </div>
 
       <section
-        aria-label="Tracker board link"
+        aria-label="Property fixes board"
         className="mt-6 rounded-2xl border border-border bg-card p-4"
       >
         <h2 className="font-display text-base font-bold tracking-tight">
-          Your tracker board
+          Your property fixes
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Get the private tracker-board link for this property. No account
+          See every issue from this property laid out on the board. No account
           needed.
         </p>
         <div className="mt-3">
-          <BoardLinkRequest
-            jobId={anchor.id}
-            knownEmail={anchor.requesterContact}
-          />
+          <Link
+            href={`/board?property=${encodeURIComponent(address)}`}
+            className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-accent-foreground sm:w-auto"
+          >
+            View my property fixes on board
+          </Link>
         </div>
       </section>
 

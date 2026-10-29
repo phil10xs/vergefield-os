@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { House } from "lucide-react";
-import { createPublicRequestAction } from "@/app/actions/jobs";
+import { createPublicRequestAction } from "@/app/actions/requests";
 import { CapturePicker } from "@/components/capture/capture-picker";
 import { NoteField } from "@/components/request/note-field";
 import { SubmitCheckinButton } from "@/components/request/submit-checkin-button";
