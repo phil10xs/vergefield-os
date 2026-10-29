@@ -44,7 +44,8 @@ export default async function RequestThanksPage({
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
           Bookmark the tracking link — it is your private receipt for this
-          request.
+          request. The trade team reviews every request in turn, urgent issues
+          first.
         </p>
       </div>
     </main>

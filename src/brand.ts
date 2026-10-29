@@ -2,7 +2,7 @@ export const brand = {
   name: "VergeField OS",
   tagline: "Chat-to-action FieldOps. Type, snap, done.",
   description:
-    "VergeField OS turns site chat, photos, and video into jobs, dispatches, and reports.",
+    "From leak to fixed — report an issue in seconds and track it to done.",
 } as const;
 
 export const colors = {

@@ -98,3 +98,16 @@ Without a key (or if analysis fails), requests still work end to end —
 transcripts show as unavailable and the team uses the note plus the video's
 own voice. Duration (20 s) and the one-video rule are enforced in the browser
 before submit, with a server-side one-video backstop.
+
+## Demo in 5 minutes
+
+```bash
+pnpm db:seed   # reset to 3 jobs + 1 report + 1 demo request
+pnpm dev       # http://localhost:3002
+```
+
+1. Owner: open `/request`, film ≤20 s narrating the issue, send.
+2. Track the reference at `/request/[id]` — transcript, trade, status.
+3. Trade: open the job from `/jobs`, confirm title and trade, accept.
+4. Capture stills, run the checklist, generate the report.
+5. Back on tracking: the full story, reference to report.

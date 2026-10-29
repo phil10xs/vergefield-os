@@ -61,8 +61,24 @@ async function main() {
     });
   }
 
+  const [demoRequest] = await db
+    .insert(job)
+    .values({
+      title: "Plumber request — M14: Leaking tap",
+      siteName: "14 Rosebank Road, Manchester",
+      status: "requested",
+      priority: "high",
+      tradesmanTrade: "Plumber",
+      source: "public",
+      requesterName: "Jordan Lee",
+      requesterContact: "07123 888888",
+      propertyAddress: "14 Rosebank Road, Manchester",
+      notes: "Leaking tap",
+    })
+    .returning();
+
   console.log(
-    `Seeded ${[firstFit, snagging, commissioning].filter(Boolean).length} jobs + 1 site report.`,
+    `Seeded ${[firstFit, snagging, commissioning].filter(Boolean).length} jobs + 1 site report + ${demoRequest ? 1 : 0} demo request.`,
   );
   await client.end();
 }

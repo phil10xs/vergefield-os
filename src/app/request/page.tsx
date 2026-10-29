@@ -28,7 +28,8 @@ export default function PublicRequestPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             Owners and tenants: leave your name and address, then show the
             issue — one video up to 20 seconds, plus stills. The trade is
-            detected automatically from your video. No account needed.
+            detected automatically from your video. No account needed, and most
+            requests take under a minute.
           </p>
         </div>
       </div>
