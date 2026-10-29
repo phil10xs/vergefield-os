@@ -121,11 +121,11 @@ export default async function JobDetailPage({
 
       {isRequest ? (
         <section
-          aria-label="Triage request"
+          aria-label="Triage check-in"
           className="mb-6 rounded-2xl border border-border bg-card p-4"
         >
           <h2 className="font-display text-base font-bold tracking-tight">
-            New public request — accept or decline
+            New check-in — accept or decline
           </h2>
           <div className="mt-3 flex flex-col gap-2">
             <form action={triageRequestAction} className="space-y-3">

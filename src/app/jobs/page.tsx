@@ -17,7 +17,7 @@ export default async function JobsPage() {
     <main className="mx-auto w-full max-w-[var(--app-page-max)] px-[var(--app-gutter)] py-8">
       <ListHero
         title="Jobs"
-        description="Work orders across every site. Chat-to-action will create and dispatch these."
+        description="Work orders across every site — check-ins arrive here as Requested."
         icon={ClipboardList}
         count={jobs.length}
         countLabel={jobs.length === 1 ? "job" : "jobs"}
@@ -28,11 +28,11 @@ export default async function JobsPage() {
       />
 
       <p className="mb-4 rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
-        Customer intake is live — share{" "}
+        Check-in intake is live — share{" "}
         <Link href="/request" className="font-semibold text-link hover:underline">
           /request
         </Link>{" "}
-        with owners and tenants. New requests arrive here with a{" "}
+        with owners and tenants. New check-ins arrive here with a{" "}
         <span className="font-semibold text-foreground">Requested</span> status.
       </p>
 

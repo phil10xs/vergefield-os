@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { NoteField } from "@/components/request/note-field";
 import { brand } from "@/brand";
 
-export const metadata: Metadata = { title: "Request a repair" };
+export const metadata: Metadata = { title: "Check in" };
 
 const inputClass =
   "h-11 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -22,13 +22,13 @@ export default function PublicRequestPage() {
             {brand.name}
           </p>
           <h1 className="font-display text-[length:var(--app-title-size)] font-bold tracking-tight">
-            Request a repair
+            Check in your property
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Owners and tenants: leave your name, address, and a short
-            description of the issue. The trade is detected automatically from
-            what you write. No account needed, and most requests take under a
-            minute.
+            Landlords, owners and tenants: leave your name, address and a
+            short note, then film what you see. You get a report and board
+            tracker for the issues spotted till it&apos;s fixed. Powered by{" "}
+            {brand.engine}.
           </p>
         </div>
       </div>
@@ -82,7 +82,7 @@ export default function PublicRequestPage() {
         </div>
         <NoteField />
         <Button type="submit" variant="accent" className="w-full">
-          Send request
+          Submit check-in
         </Button>
       </form>
     </main>

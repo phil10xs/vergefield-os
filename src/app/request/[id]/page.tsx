@@ -90,7 +90,7 @@ export default async function PublicTrackPage({
     } else {
       reports.set(
         session.id,
-        await generateReport(session.id, session.requesterName ?? "VergeField OS", {
+        await generateReport(session.id, session.requesterName ?? "VergeSnap", {
           markSubmitted: false,
         }),
       );
@@ -107,11 +107,11 @@ export default async function PublicTrackPage({
           />
           <div className="text-sm">
             <p className="font-semibold">
-              Request received — reference {reference}
+              Check-in received — reference {reference}
             </p>
             <p className="mt-0.5 text-muted-foreground">
               Bookmark this page — it is your private receipt. The trade team
-              reviews every request in turn, urgent issues first.
+              reviews every check-in in turn, urgent issues first.
             </p>
           </div>
         </div>
@@ -249,8 +249,9 @@ export default async function PublicTrackPage({
           Full board &amp; reports
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Add your email and we&apos;ll send a private link to the full kanban
-          board and complete reports for this property. No account needed.
+          Add your email and we&apos;ll send a private link to the tracker
+          board and complete visit reports for this property. No account
+          needed.
         </p>
         <div className="mt-3">
           <BoardLinkRequest jobId={anchor.id} />
@@ -258,7 +259,7 @@ export default async function PublicTrackPage({
       </section>
 
       <p className="mt-6 text-sm text-muted-foreground">
-        The trade team reviews every request in turn. Urgent issues go first —
+        The trade team reviews every check-in in turn. Urgent issues go first —
         for emergencies, call the number on your tenancy agreement.
       </p>
     </main>

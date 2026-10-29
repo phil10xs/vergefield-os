@@ -86,7 +86,7 @@ export function JobAssignmentBadge({ assigned }: { assigned: boolean }) {
 export function JobSourceBadge({ source }: { source: string }) {
   return (
     <Badge tone={source === "public" ? "info" : "neutral"}>
-      {source === "public" ? "Public request" : "Internal"}
+      {source === "public" ? "Check-in" : "Internal"}
     </Badge>
   );
 }

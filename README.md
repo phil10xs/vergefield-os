@@ -1,8 +1,9 @@
-# VergeField OS
+# VergeSnap
 
-Chat-to-action FieldOps for the Meta AI Global Hackathon (indie track).
-Type a site update — VergeField OS creates and dispatches the job —
-then roll captures into a shareable site photo–video report.
+Property check-ins for the Meta AI Global Hackathon (indie track),
+powered by the VergeSnag AI engine. Check in on your property, get an
+organized snag list & tracker board in under a minute — every visit
+remembered forever.
 
 Separate project from GoVerge. It reuses GoVerge's brand tokens, button
 variants, status badges, page header, and list hero (copied, not linked),

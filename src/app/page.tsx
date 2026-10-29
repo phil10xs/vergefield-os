@@ -22,7 +22,7 @@ export default async function HomePage() {
         description={brand.description}
         icon={HardHat}
         count={jobs.length}
-        countLabel={jobs.length === 1 ? "recent job" : "recent jobs"}
+        countLabel={jobs.length === 1 ? "recent session" : "recent sessions"}
         actionHref="/jobs"
         actionLabel="View all jobs"
         secondaryHref="/api/health"
@@ -36,13 +36,13 @@ export default async function HomePage() {
             aria-hidden
           />
           <h2 className="font-display text-lg font-bold tracking-tight">
-            Latest jobs
+            Latest sessions
           </h2>
         </div>
         {jobs.length === 0 ? (
           <EmptyState
-            title="No jobs yet"
-            description="Seed the demo data or push the schema, then reload to see site jobs here."
+            title="No sessions yet"
+            description="Seed the demo data or push the schema, then reload to see sessions here."
           />
         ) : (
           <JobTable jobs={jobs} />
@@ -54,7 +54,7 @@ export default async function HomePage() {
         className="mt-8 rounded-2xl border border-border bg-card p-5"
       >
         <h2 className="font-display text-base font-bold tracking-tight">
-          Two doors
+          Start here
         </h2>
         <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
           <li>
@@ -65,9 +65,9 @@ export default async function HomePage() {
           </li>
           <li>
             <Link href="/request" className="font-semibold text-link hover:underline">
-              Public request
+              Check in a property
             </Link>{" "}
-            — owners and tenants report an issue with photos or video.
+            — landlords, owners and tenants check in with photos or video.
           </li>
           <li>
             <Link href="/track" className="font-semibold text-link hover:underline">

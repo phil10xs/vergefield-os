@@ -13,7 +13,7 @@ import { db } from "@/db";
 import { job } from "@/db/schema";
 import { asc, eq } from "drizzle-orm";
 
-export const metadata: Metadata = { title: "Shared board" };
+export const metadata: Metadata = { title: "Tracker board" };
 
 const COLUMNS = [
   { key: "requested", label: "Requested" },
@@ -43,8 +43,8 @@ export default async function PublicBoardPage({
             This link has expired
           </h1>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            Board links last 7 days. Ask for a fresh one from the tracking page
-            — no account needed.
+            Board links last 7 days. Ask for a fresh one from your visit
+            report — no account needed.
           </p>
           <div className="mt-5">
             <Link href="/request">

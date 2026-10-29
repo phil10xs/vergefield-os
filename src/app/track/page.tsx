@@ -24,7 +24,7 @@ export default async function TrackPage({
     <main className="mx-auto w-full max-w-[var(--app-page-max)] px-[var(--app-gutter)] py-8">
       <ListHero
         title="Track"
-        description="Every property's visits and sessions — as a list or a board."
+        description="Every property's visits and sessions — as a snag list or a tracker board."
         icon={current === "board" ? KanbanSquare : ClipboardCheck}
         count={jobs.length}
         countLabel={jobs.length === 1 ? "session" : "sessions"}
