@@ -234,17 +234,19 @@ const BOARD_FLOW = ["requested", "in_progress", "completed", "paid"] as const;
 export async function stepJobStatus(
   jobId: string,
   direction: "next" | "prev",
-): Promise<void> {
+): Promise<string> {
   const [row] = await db.select().from(job).where(eq(job.id, jobId));
   if (!row) throw new Error("Job not found");
   const at = (BOARD_FLOW as readonly string[]).indexOf(row.status);
   if (at === -1) {
     await setJobStatus(jobId, "requested");
-    return;
+    return "requested";
   }
   const next = at + (direction === "next" ? 1 : -1);
-  if (next < 0 || next >= BOARD_FLOW.length) return;
-  await setJobStatus(jobId, BOARD_FLOW[next]!);
+  if (next < 0 || next >= BOARD_FLOW.length) return row.status;
+  const status = BOARD_FLOW[next]!;
+  await setJobStatus(jobId, status);
+  return status;
 }
 
 export async function markPaid(jobId: string): Promise<void> {

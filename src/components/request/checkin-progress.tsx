@@ -26,18 +26,25 @@ export function CheckinProgress({
   onCancel?: () => void;
 }) {
   const [step, setStep] = React.useState(0);
+  const [elapsed, setElapsed] = React.useState(0);
   const [slow, setSlow] = React.useState(false);
 
   React.useEffect(() => {
     const timer = setInterval(() => {
       setStep((current) => Math.min(current + 1, STEPS.length - 1));
     }, STEP_MS);
+    const clock = setInterval(() => {
+      setElapsed((seconds) => seconds + 1);
+    }, 1000);
     const slowTimer = setTimeout(() => setSlow(true), 60000);
     return () => {
       clearInterval(timer);
+      clearInterval(clock);
       clearTimeout(slowTimer);
     };
   }, []);
+
+  const stamped = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")}`;
 
   return (
     <div
@@ -92,6 +99,14 @@ export function CheckinProgress({
             );
           })}
         </ol>
+        <div className="mt-6" aria-hidden>
+          <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+            <div className="h-full w-2/5 animate-progress-slide rounded-full bg-[var(--gv-teal-bright)]" />
+          </div>
+          <p className="mt-2 text-xs tabular-nums text-muted-foreground">
+            {stamped} elapsed — still working
+          </p>
+        </div>
         {slow && onCancel ? (
           <div className="mt-6">
             <p className="text-xs text-muted-foreground">

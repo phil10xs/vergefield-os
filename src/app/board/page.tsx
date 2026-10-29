@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { KanbanSquare } from "lucide-react";
+import { CheckCircle2, KanbanSquare } from "lucide-react";
 import { ListHero } from "@/components/layout/list-overview";
 import {
   JobPaymentBadge,
   JobStatusBadge,
 } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
+import { ReportCelebration } from "@/components/request/report-celebration";
 import { stepJobStatusAction } from "@/app/actions/requests";
 import { sessionAddress } from "@/lib/sessions";
 import { db } from "@/db";
@@ -26,9 +27,9 @@ const COLUMNS = [
 export default async function BoardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ property?: string }>;
+  searchParams: Promise<{ property?: string; celebrate?: string }>;
 }) {
-  const { property } = await searchParams;
+  const { property, celebrate } = await searchParams;
 
   if (!property) {
     const rows = await db
@@ -90,6 +91,7 @@ export default async function BoardPage({
 
   return (
     <main className="mx-auto w-full max-w-[var(--app-page-max)] px-[var(--app-gutter)] py-8">
+      <ReportCelebration active={celebrate === "1"} />
       <ListHero
         title={title}
         description="Your Home/Property's Issues & Bills Tracker Board for this property — tap ‹ › to move issues along."
@@ -99,6 +101,21 @@ export default async function BoardPage({
         actionHref="/request"
         actionLabel="New check-in"
       />
+
+      {celebrate === "1" ? (
+        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
+          <CheckCircle2
+            className="mt-0.5 h-5 w-5 shrink-0 text-[var(--gv-teal-bright)]"
+            aria-hidden
+          />
+          <div className="text-sm">
+            <p className="font-semibold">Issue moved to Completed.</p>
+            <p className="mt-0.5 text-muted-foreground">
+              One more fix off the list.
+            </p>
+          </div>
+        </div>
+      ) : null}
 
       <div className="flex snap-x gap-4 overflow-x-auto pb-2">
         {COLUMNS.map((column) => {
@@ -149,6 +166,11 @@ export default async function BoardPage({
                         <form action={stepJobStatusAction}>
                           <input type="hidden" name="jobId" value={card.id} />
                           <input type="hidden" name="direction" value="prev" />
+                          <input
+                            type="hidden"
+                            name="property"
+                            value={property}
+                          />
                           <Button
                             type="submit"
                             size="sm"
@@ -162,6 +184,11 @@ export default async function BoardPage({
                       <form action={stepJobStatusAction} className="flex-1">
                         <input type="hidden" name="jobId" value={card.id} />
                         <input type="hidden" name="direction" value="next" />
+                        <input
+                          type="hidden"
+                          name="property"
+                          value={property}
+                        />
                         <Button
                           type="submit"
                           size="sm"

@@ -31,6 +31,16 @@
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
   --spacing-gutter: var(--app-gutter);
+  --animate-progress-slide: progress-slide 1.4s ease-in-out infinite;
+}
+
+@keyframes progress-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
 }
 
 @layer base {

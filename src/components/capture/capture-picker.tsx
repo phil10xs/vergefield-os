@@ -3,7 +3,9 @@
 import * as React from "react";
 import { Images, Plus, Video, X } from "lucide-react";
 import { durationOf } from "./media-upload-fields";
+import { VideoRecorder } from "./video-recorder";
 import { checkMediaSelection } from "@/lib/media-rules";
+import { isRecordingSupported } from "@/lib/recorder";
 
 type Source = "video" | "gallery";
 
@@ -24,7 +26,7 @@ const SOURCES: {
   {
     key: "video",
     label: "Record a video",
-    hint: "Up to 20 seconds, narrate as you film",
+    hint: "Up to 20 seconds · capped for fast upload",
     icon: Video,
   },
   {
@@ -37,6 +39,7 @@ const SOURCES: {
 
 export function CapturePicker() {
   const [sheetOpen, setSheetOpen] = React.useState(false);
+  const [recorderOpen, setRecorderOpen] = React.useState(false);
   const [previews, setPreviews] = React.useState<Preview[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const videoRef = React.useRef<HTMLInputElement>(null);
@@ -110,9 +113,23 @@ export function CapturePicker() {
 
   function pick(source: Source) {
     setSheetOpen(false);
+    if (source === "video" && isRecordingSupported()) {
+      setRecorderOpen(true);
+      return;
+    }
     inputList()
       .find((entry) => entry.source === source)
       ?.el?.click();
+  }
+
+  function acceptRecording(file: File) {
+    const el = videoRef.current;
+    setRecorderOpen(false);
+    if (!el) return;
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    el.files = transfer.files;
+    void sync();
   }
 
   return (
@@ -198,6 +215,15 @@ export function CapturePicker() {
         One session per video — keep each clip to 20 seconds. Narrate as
         you film, the trade is detected from your words.
       </p>
+
+      {recorderOpen ? (
+        <div className="fixed inset-0 z-50 bg-black/50" role="presentation">
+          <VideoRecorder
+            onDone={acceptRecording}
+            onCancel={() => setRecorderOpen(false)}
+          />
+        </div>
+      ) : null}
 
       {sheetOpen ? (
         <div

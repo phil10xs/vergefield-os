@@ -133,10 +133,14 @@ export async function stepJobStatusAction(
 ): Promise<void> {
   const jobId = formText(formData, "jobId");
   const direction = formText(formData, "direction");
+  const property = formText(formData, "property") ?? "";
   if (!jobId || (direction !== "next" && direction !== "prev")) {
     throw new Error("Job and direction are required");
   }
-  await stepJobStatus(jobId, direction);
+  const status = await stepJobStatus(jobId, direction);
   revalidatePath("/track");
   revalidatePath("/board");
+  if (status === "completed") {
+    redirect(`/board?property=${encodeURIComponent(property)}&celebrate=1`);
+  }
 }
