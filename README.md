@@ -44,6 +44,8 @@ Open [http://localhost:3002](http://localhost:3002) in a browser.
 
 - `pnpm typecheck` — TypeScript
 - `pnpm lint` — ESLint
+- `pnpm test` — unit tests (vitest)
+- `pnpm test:e2e` — end-to-end flow against a running server (see below)
 - `GET /api/health` — app + database status (`{"ok":true,"db":"up"}`)
 
 ## Layout
@@ -53,7 +55,7 @@ src/app            Routes: / (→ /request), /request (check-in landing),
                    /request/checkin (film + submit), /request/[id] (visit report),
                    /track (Issues snag list), /board (read-only Issues & Bill
                    Tracker board), /b/[token] (placeholder), /api/health, /api/media
-src/components     VergeSnag UI: button, status badges, page header, list hero
+src/components     VergeSnag UI: button, status badges, page header, app shell
 src/lib            Trade inference, report sections, session grouping
 src/server         Reporting and media storage logic
 src/db             Drizzle client + schema (job, site_report, site_media, …)
@@ -64,13 +66,14 @@ scripts/seed.ts    Demo seed data (loads scripts/demo-fixture.json)
 ## Check-in flow
 
 Check in → Visit report → Track. Landlords, owners and tenants check in a
-property from `/request`: name, contact, address, then one video per issue
-(up to 20 seconds each) narrating what they see. Each video becomes a
-session — trade auto-detected, reference issued — grouped under its visit on
-the visit report (`/request/[id]`), with an Issues snag list and a Meta Spark
-analysis block. `/track` holds every property's Issues snag list; from the
-report, "View my Issues & Bills Tracker Board" opens the property's read-only
-board at `/board`. Uploads stay on this machine under `uploads/`.
+property from `/request`: address, then one video per issue (up to 20 seconds
+each) narrating what they see — a video is enough to submit. Each video
+becomes a session — trade auto-detected, reference issued — grouped under
+its visit on the visit report (`/request/[id]`), with an Issues snag list
+and a Meta Spark analysis block. `/track` holds every property's Issues snag
+list; from the report, "View my Issues & Bills Tracker Board" opens the
+property's read-only board at `/board`. Uploads stay on this machine under
+`uploads/`.
 
 Every screen is mobile-first and adaptive across phone, tablet, and laptop:
 single-column forms, 44px touch targets, camera capture on phones degrading
@@ -126,10 +129,28 @@ pnpm db:seed   # reset to the 6-check-in mock fixture
 pnpm dev       # http://localhost:3002
 ```
 
-1. Landlord: open `/request`, start a check-in, film one ≤20 s video per
-   issue narrating what you see, send.
+1. Landlord: open `/request`, start a check-in, enter the address, film one
+   ≤20 s video per issue narrating what you see, send.
 2. Visit report at `/request/[id]` — sessions, Issues snag list, Meta Spark
    analysis.
 3. Snag list at `/track` — every property's visits and sessions.
 4. Issues & Bills Tracker Board from the report — the property's read-only
-   board.
+   board; tap › to move a card to Completed.
+
+## Pre-submit test
+
+Automated first (server must be running):
+
+```bash
+pnpm dev              # in one terminal → http://localhost:3002
+pnpm test:e2e         # in another: submits a check-in, walks report →
+                      # snag list → board, moves a card to Completed, cleans up
+pnpm test             # unit tests
+pnpm check:secrets    # must pass before every push
+```
+
+Then click through once in the browser (desktop + phone width): land →
+check in with a real clip → confetti report → snag list → board move to
+Completed with confetti. If the server ever stops responding, restart
+`pnpm dev` (a huge raw gallery upload can wedge it — the in-app recorder
+keeps clips small).
