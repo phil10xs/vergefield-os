@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { CheckCircle2, KanbanSquare } from "lucide-react";
-import { ListHero } from "@/components/layout/list-overview";
+import { AppShell } from "@/components/layout/app-shell";
+import { Notice, PageHeader } from "@/components/layout/page-header";
 import {
   JobPaymentBadge,
   JobStatusBadge,
@@ -45,15 +45,21 @@ export default async function BoardPage({
       ),
     ];
     return (
-      <main className="mx-auto w-full max-w-xl px-[var(--app-gutter)] py-8">
-        <ListHero
+      <AppShell>
+        <PageHeader
+          eyebrow="Tracker board"
           title="Your Home/Property's Issues & Bills Tracker Board"
           description="Pick a property to see its board."
-          icon={KanbanSquare}
-          count={addresses.length}
-          countLabel={addresses.length === 1 ? "property" : "properties"}
-          actionHref="/request"
-          actionLabel="New check-in"
+          meta={`${addresses.length} ${addresses.length === 1 ? "property" : "properties"}`}
+          backHref="/request"
+          backLabel="Back to check-in"
+          actions={
+            <Link href="/request" className="flex w-full">
+              <Button variant="accent" className="w-full">
+                New check-in
+              </Button>
+            </Link>
+          }
         />
         <ul className="space-y-2">
           {addresses.map((address) => (
@@ -67,15 +73,7 @@ export default async function BoardPage({
             </li>
           ))}
         </ul>
-        <p className="mt-4 text-center text-sm">
-          <Link
-            href="/request"
-            className="font-semibold text-link hover:underline"
-          >
-            ← Back to check-in
-          </Link>
-        </p>
-      </main>
+      </AppShell>
     );
   }
 
@@ -90,31 +88,28 @@ export default async function BoardPage({
   );
 
   return (
-    <main className="mx-auto w-full max-w-[var(--app-page-max)] px-[var(--app-gutter)] py-8">
+    <AppShell>
       <ReportCelebration active={celebrate === "1"} />
-      <ListHero
+      <PageHeader
+        eyebrow="Tracker board"
         title={title}
         description="Your Home/Property's Issues & Bills Tracker Board for this property — tap ‹ › to move issues along."
-        icon={KanbanSquare}
-        count={jobs.length}
-        countLabel={jobs.length === 1 ? "session" : "sessions"}
-        actionHref="/request"
-        actionLabel="New check-in"
+        meta={`${jobs.length} ${jobs.length === 1 ? "session" : "sessions"}`}
+        backHref="/track"
+        backLabel="Back to snag list"
+        actions={
+          <Link href="/request" className="flex w-full">
+            <Button variant="accent" className="w-full">
+              New check-in
+            </Button>
+          </Link>
+        }
       />
 
       {celebrate === "1" ? (
-        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
-          <CheckCircle2
-            className="mt-0.5 h-5 w-5 shrink-0 text-[var(--gv-teal-bright)]"
-            aria-hidden
-          />
-          <div className="text-sm">
-            <p className="font-semibold">Issue moved to Completed.</p>
-            <p className="mt-0.5 text-muted-foreground">
-              One more fix off the list.
-            </p>
-          </div>
-        </div>
+        <Notice title="Issue moved to Completed.">
+          One more fix off the list.
+        </Notice>
       ) : null}
 
       <div className="flex snap-x gap-4 overflow-x-auto pb-2">
@@ -218,11 +213,6 @@ export default async function BoardPage({
           {[...new Set(parked.map((entry) => entry.status))].join(", ")}).
         </p>
       ) : null}
-      <p className="mt-4 text-center text-sm">
-        <Link href="/request" className="font-semibold text-link hover:underline">
-          ← Back to check-in
-        </Link>
-      </p>
-    </main>
+    </AppShell>
   );
 }

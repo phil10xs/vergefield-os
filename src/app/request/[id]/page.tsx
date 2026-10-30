@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Check, CheckCircle2, ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
+import { AppShell } from "@/components/layout/app-shell";
+import { Notice, PageHeader } from "@/components/layout/page-header";
 import {
   JobPaymentBadge,
   JobSeverityBadge,
@@ -66,7 +68,6 @@ export default async function PublicTrackPage({
         .orderBy(asc(job.createdAt))
     : [anchor];
   const sessions = selectVisitSessions(siblings, anchor);
-  const budget = sumCostBands(sessions.map((entry) => entry.costBand));
   const address = sessionAddress(anchor);
   const day = visitDayOf(anchor.createdAt);
   const reference = anchor.id.slice(0, 8).toUpperCase();
@@ -136,102 +137,93 @@ export default async function PublicTrackPage({
     };
   });
 
+  const budget = sumCostBands(sessions.map((entry) => entry.costBand));
+
   return (
-    <main className="mx-auto w-full max-w-2xl px-[var(--app-gutter)] py-8">
+    <AppShell>
       <ReportCelebration active={fresh === "1"} />
       {fresh === "1" ? (
-        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
-          <CheckCircle2
-            className="mt-0.5 h-5 w-5 shrink-0 text-[var(--gv-teal-bright)]"
-            aria-hidden
-          />
-          <div className="text-sm">
-            <p className="font-semibold">
-              Analysis complete — Issues snag list ready · {reference}
-            </p>
-            <p className="mt-0.5 text-muted-foreground">
-              Your clips are analysed and every issue is listed below.
-              Bookmark this page — it is your private receipt.
-            </p>
-          </div>
-        </div>
+        <Notice title={`Analysis complete — Issues snag list ready · ${reference}`}>
+          Your clips are analysed and every issue is listed below. Bookmark
+          this page — it is your private receipt.
+        </Notice>
       ) : null}
 
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        Visit report · {reference}
-      </p>
-      <h1 className="mt-1 font-display text-[length:var(--app-title-size)] font-bold tracking-tight">
-        {address}
-      </h1>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <PageHeader
+        eyebrow={`Visit report · ${reference}`}
+        title={address}
+        description={
+          anchor.businessName
+            ? `Checked in by ${anchor.requesterName ?? "you"} · ${anchor.businessName}`
+            : undefined
+        }
+        meta={`${formatVisitDay(day)} · ${sessions.length} ${
+          sessions.length === 1 ? "issue" : "issues"
+        }${budget ? ` · budget ${formatBudget(budget)}` : ""}`}
+      />
+      <div className="mb-6">
         <JobStatusBadge status={visitStatus(sessions)} />
-        <span className="text-sm text-muted-foreground">
-          {formatVisitDay(day)} · {sessions.length}{" "}
-          {sessions.length === 1 ? "issue" : "issues"}
-          {budget ? ` · budget ${formatBudget(budget)}` : ""}
-        </span>
       </div>
-      {anchor.businessName ? (
-        <p className="mt-1 text-sm text-muted-foreground">
-          Checked in by {anchor.requesterName ?? "you"} · {anchor.businessName}
-        </p>
-      ) : null}
 
-      <details
-        open
-        className="group mt-6 overflow-hidden rounded-2xl border border-border bg-card"
-      >
-        <summary className="flex cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
-          <ChevronDown
-            className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
-            aria-hidden
-          />
-          <span className="font-display text-base font-bold tracking-tight">
-            Issues snag list · {views.length}{" "}
-            {views.length === 1 ? "issue" : "issues"}
-          </span>
-        </summary>
-        <ul className="space-y-2.5 border-t border-border px-4 py-4">
-          {views.map((view, index) => {
-            const done =
-              view.session.status === "completed" ||
-              view.session.status === "paid";
-            return (
-              <li key={view.session.id} className="flex items-start gap-3">
-                <span
-                  aria-hidden
-                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 ${
-                    done
-                      ? "border-[var(--gv-teal-bright)] bg-[var(--gv-teal-bright)] text-black"
-                      : "border-muted-foreground/40"
-                  }`}
+      <div className="lg:grid lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)] lg:items-start lg:gap-8">
+        <aside className="mb-6 min-w-0 lg:sticky lg:top-20 lg:mb-0 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="border-b border-border px-4 py-4">
+              <h2 className="font-display text-base font-bold tracking-tight">
+                Issues snag list · {views.length}{" "}
+                {views.length === 1 ? "issue" : "issues"}
+              </h2>
+              <div className="mt-3">
+                <Link
+                  href={`/board?property=${encodeURIComponent(address)}`}
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-accent px-4 py-2 text-center text-sm font-semibold text-accent-foreground"
                 >
-                  {done ? (
-                    <Check className="h-3.5 w-3.5" aria-hidden />
-                  ) : null}
-                </span>
-                <span className="min-w-0 text-sm">
-                  <span className="block font-semibold leading-snug">
-                    {index + 1}. {view.session.title}
-                  </span>
-                  <span className="mt-0.5 block leading-snug text-muted-foreground">
-                    {view.summary}
-                  </span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">
-                    {view.session.tradesmanTrade ?? "Trade detecting…"} ·{" "}
-                    {view.session.status.replace(/_/g, " ")}
-                    {view.session.costBand
-                      ? ` · likely ${view.session.costBand}`
-                      : ""}
-                  </span>
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </details>
+                  View my Home/Property&apos;s Issues &amp; Bills Tracker Board
+                </Link>
+              </div>
+            </div>
+            <ul className="space-y-3 px-4 py-4">
+              {views.map((view, index) => {
+                const done =
+                  view.session.status === "completed" ||
+                  view.session.status === "paid";
+                return (
+                  <li key={view.session.id} className="flex items-start gap-3">
+                    <span
+                      aria-hidden
+                      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 ${
+                        done
+                          ? "border-[var(--gv-teal-bright)] bg-[var(--gv-teal-bright)] text-black"
+                          : "border-muted-foreground/40"
+                      }`}
+                    >
+                      {done ? (
+                        <Check className="h-3.5 w-3.5" aria-hidden />
+                      ) : null}
+                    </span>
+                    <span className="min-w-0 text-sm">
+                      <span className="block font-semibold leading-snug break-words">
+                        {index + 1}. {view.session.title}
+                      </span>
+                      <span className="mt-0.5 block leading-snug text-muted-foreground break-words">
+                        {view.summary}
+                      </span>
+                      <span className="mt-0.5 block text-sm text-muted-foreground">
+                        {view.session.tradesmanTrade ?? "Trade detecting…"} ·{" "}
+                        {view.session.status.replace(/_/g, " ")}
+                        {view.session.costBand
+                          ? ` · likely ${view.session.costBand}`
+                          : ""}
+                      </span>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </aside>
 
-      <div className="mt-6 space-y-3">
+      <div className="min-w-0 space-y-3">
         {views.map((view, index) => (
           <details
             key={view.session.id}
@@ -240,67 +232,74 @@ export default async function PublicTrackPage({
           >
             <summary
               aria-label={`Issue ${index + 1}: ${view.session.title}`}
-              className="flex cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden"
+              className="flex cursor-pointer list-none items-start gap-3 p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden"
             >
               <ChevronDown
-                className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
                 aria-hidden
               />
               <span className="min-w-0 flex-1">
-                <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className="block text-sm font-semibold text-muted-foreground">
                   Issue {index + 1} of {views.length}
                 </span>
-                <span className="block truncate font-display text-base font-bold tracking-tight">
+                <span className="mt-0.5 block font-display text-base font-bold tracking-tight break-words">
                   {view.session.title}
                 </span>
-              </span>
-              <span className="flex shrink-0 items-center gap-1.5">
-                <JobStatusBadge status={view.session.status} />
-                {view.session.severity ? (
-                  <JobSeverityBadge severity={view.session.severity} />
-                ) : null}
-                <JobPaymentBadge
-                  status={view.session.paymentStatus}
-                  amountPence={view.session.paymentAmount}
-                />
+                <span className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <JobStatusBadge status={view.session.status} />
+                  <JobPaymentBadge
+                    status={view.session.paymentStatus}
+                    amountPence={view.session.paymentAmount}
+                  />
+                </span>
               </span>
             </summary>
             <div className="border-t border-border px-4 py-4">
-              <dl className="grid gap-2 text-sm">
-                <div className="flex gap-2">
-                  <dt className="shrink-0 font-semibold">Trade:</dt>
-                  <dd>{view.session.tradesmanTrade ?? "Detecting…"}</dd>
-                </div>
-                {view.session.costBand ? (
-                  <div className="flex gap-2">
-                    <dt className="shrink-0 font-semibold">Likely cost:</dt>
-                    <dd>{view.session.costBand}</dd>
-                  </div>
+              <dl className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">
+                <dt className="font-semibold text-muted-foreground">Trade</dt>
+                <dd className="min-w-0 break-words">
+                  {view.session.tradesmanTrade ?? "Detecting…"}
+                </dd>
+                <dt className="font-semibold text-muted-foreground">Issue</dt>
+                <dd className="min-w-0 font-semibold leading-relaxed break-words">
+                  {view.name}
+                </dd>
+                {view.session.severity ? (
+                  <>
+                    <dt className="font-semibold text-muted-foreground">
+                      Severity
+                    </dt>
+                    <dd>
+                      <JobSeverityBadge severity={view.session.severity} />
+                    </dd>
+                  </>
                 ) : null}
-                <div className="flex gap-2">
-                  <dt className="shrink-0 font-semibold">Issue:</dt>
-                  <dd className="font-semibold leading-relaxed">
-                    {view.name}
-                  </dd>
-                </div>
+                {view.session.costBand ? (
+                  <>
+                    <dt className="font-semibold text-muted-foreground">
+                      Likely cost
+                    </dt>
+                    <dd className="break-words">{view.session.costBand}</dd>
+                  </>
+                ) : null}
                 {view.heard.length > 0 ? (
-                  <div className="flex gap-2">
-                    <dt className="shrink-0 font-semibold">Heard:</dt>
-                    <dd className="whitespace-pre-line leading-relaxed">
+                  <>
+                    <dt className="font-semibold text-muted-foreground">Heard</dt>
+                    <dd className="min-w-0 whitespace-pre-line leading-relaxed break-words">
                       {condenseTranscript(view.heard.join(" "))}
                     </dd>
-                  </div>
+                  </>
                 ) : null}
                 {view.seen.length > 0 ? (
-                  <div className="flex gap-2">
-                    <dt className="shrink-0 font-semibold">Seen:</dt>
-                    <dd className="whitespace-pre-line leading-relaxed text-muted-foreground">
+                  <>
+                    <dt className="font-semibold text-muted-foreground">Seen</dt>
+                    <dd className="min-w-0 whitespace-pre-line leading-relaxed break-words text-muted-foreground">
                       {condenseTranscript(view.seen.join(" "))}
                     </dd>
-                  </div>
+                  </>
                 ) : null}
                 {view.heard.length === 0 && view.seen.length === 0 ? (
-                  <dd className="text-muted-foreground">
+                  <dd className="col-span-2 text-muted-foreground">
                     {view.clips.some((row) => row.kind === "video")
                       ? "Video received — transcription lands here once processed."
                       : "No video attached — the team works from your note."}
@@ -337,7 +336,7 @@ export default async function PublicTrackPage({
                 <div className="mt-4 space-y-3 border-t border-border pt-4">
                   {view.detail.map((entry) => (
                     <div key={entry.key}>
-                      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <h3 className="text-sm font-semibold text-muted-foreground">
                         {sectionLabel(entry.key)}
                       </h3>
                       <p className="mt-1 whitespace-pre-line text-sm leading-relaxed">
@@ -355,32 +354,12 @@ export default async function PublicTrackPage({
           </details>
         ))}
       </div>
+      </div>
 
-      <section
-        aria-label="Issues and Bills Tracker Board"
-        className="mt-6 rounded-2xl border border-border bg-card p-4"
-      >
-        <h2 className="font-display text-base font-bold tracking-tight">
-          Your Home/Property&apos;s Issues &amp; Bills Tracker Board
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          See every issue from this property laid out on your tracker board.
-          No account needed.
-        </p>
-        <div className="mt-3">
-          <Link
-            href={`/board?property=${encodeURIComponent(address)}`}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-accent px-4 py-2 text-center text-sm font-semibold text-accent-foreground sm:w-auto"
-          >
-            View my Home/Property&apos;s Issues &amp; Bills Tracker Board
-          </Link>
-        </div>
-      </section>
-
-      <p className="mt-6 text-sm text-muted-foreground">
+      <p className="mt-6 max-w-3xl text-sm leading-relaxed text-muted-foreground">
         The trade team reviews every check-in in turn. Urgent issues go first —
         for emergencies, call the number on your tenancy agreement.
       </p>
-    </main>
+    </AppShell>
   );
 }

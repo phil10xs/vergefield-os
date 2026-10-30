@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Circle, Square, VideoOff, X } from "lucide-react";
+import { Modal } from "@/components/ui/modal";
 import {
   RECORDER_AUDIO_BITS_PER_SECOND,
   RECORDER_MAX_SECONDS,
@@ -178,21 +179,16 @@ export function VideoRecorder({
   const remaining = Math.max(0, RECORDER_MAX_SECONDS - elapsed);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Record a video"
-      className="absolute inset-x-0 bottom-0 rounded-t-2xl border border-border bg-card p-4 pb-8"
-    >
-      <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-bold">
+    <Modal label="Record a video" onClose={handleCancel}>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-base font-semibold">
           {recording ? `Recording… ${remaining}s left` : "Record your clip"}
         </p>
         <button
           type="button"
           onClick={handleCancel}
           aria-label="Close recorder"
-          className="rounded-full p-1 text-muted-foreground"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground"
         >
           <X className="h-5 w-5" aria-hidden />
         </button>
@@ -211,7 +207,7 @@ export function VideoRecorder({
             autoPlay
             className="aspect-video w-full rounded-xl bg-black object-cover"
           />
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             20 seconds max · capped size for fast upload · narrate as you film
           </p>
           <div className="mt-3 flex gap-2">
@@ -220,7 +216,7 @@ export function VideoRecorder({
                 type="button"
                 onClick={startRecording}
                 disabled={!ready}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent px-3 py-3 text-sm font-semibold text-accent-foreground disabled:opacity-60"
+                className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-accent px-3 py-3 text-sm font-semibold text-accent-foreground disabled:opacity-60"
               >
                 <Circle className="h-4 w-4 fill-current" aria-hidden />
                 Start recording
@@ -229,7 +225,7 @@ export function VideoRecorder({
               <button
                 type="button"
                 onClick={stopRecording}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-destructive px-3 py-3 text-sm font-semibold text-white"
+                className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-destructive px-3 py-3 text-sm font-semibold text-white"
               >
                 <Square className="h-4 w-4 fill-current" aria-hidden />
                 Stop ({remaining}s)
@@ -245,6 +241,6 @@ export function VideoRecorder({
           Starting camera…
         </p>
       ) : null}
-    </div>
+    </Modal>
   );
 }

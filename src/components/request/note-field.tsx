@@ -34,7 +34,7 @@ export function NoteField() {
           onChange={(event) => setValue(event.target.value)}
           rows={3}
           placeholder="A sentence or two — or tap an example below…"
-          className="w-full rounded-xl border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="text-area"
         />
       </label>
       <div className="mt-2 flex flex-wrap gap-2">
@@ -43,7 +43,7 @@ export function NoteField() {
             key={example}
             type="button"
             onClick={() => setValue(example)}
-            className="rounded-lg bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground hover:bg-muted"
+            className="min-h-11 rounded-lg bg-secondary px-3 text-sm font-medium text-secondary-foreground hover:bg-muted"
           >
             {example}
           </button>

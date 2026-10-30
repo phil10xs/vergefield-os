@@ -51,9 +51,9 @@ export function CheckinProgress({
       role="status"
       aria-live="polite"
       aria-label="Submitting your check-in"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-background/95 px-[var(--app-gutter)] py-8 backdrop-blur-sm"
     >
-      <div className="w-full max-w-sm text-center">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card px-5 py-8 text-center sm:px-8">
         <CheckCircle2
           className="mx-auto h-12 w-12 text-[var(--gv-teal-bright)]"
           aria-hidden
@@ -63,7 +63,7 @@ export function CheckinProgress({
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           {brand.engine} is building your Home/Property&apos;s Issues Snag
-          list &amp; Bills Tracker Board.
+          list &amp; Bills Tracker.
         </p>
         <ol className="mt-6 space-y-3 text-left">
           {STEPS.map((label, index) => {

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Images, Plus, Video, X } from "lucide-react";
+import { Modal } from "@/components/ui/modal";
 import { durationOf } from "./media-upload-fields";
 import { VideoRecorder } from "./video-recorder";
 import { checkMediaSelection } from "@/lib/media-rules";
@@ -189,9 +190,9 @@ export function CapturePicker() {
                 type="button"
                 onClick={() => removePreview(preview)}
                 aria-label={`Remove ${preview.name}`}
-                className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white"
+                className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full bg-black/70 text-white"
               >
-                <X className="h-3.5 w-3.5" aria-hidden />
+                <X className="h-5 w-5" aria-hidden />
               </button>
             </div>
           ))}
@@ -201,7 +202,7 @@ export function CapturePicker() {
       <button
         type="button"
         onClick={() => setSheetOpen(true)}
-        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-input bg-background px-3 py-3 text-sm font-semibold"
+        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-input bg-background px-3 py-3 text-sm font-semibold"
       >
         <Plus className="h-4 w-4" aria-hidden />
         {previews.length > 0 ? "Add more" : "Add videos"}
@@ -217,60 +218,49 @@ export function CapturePicker() {
       </p>
 
       {recorderOpen ? (
-        <div className="fixed inset-0 z-50 bg-black/50" role="presentation">
-          <VideoRecorder
-            onDone={acceptRecording}
-            onCancel={() => setRecorderOpen(false)}
-          />
-        </div>
+        <VideoRecorder
+          onDone={acceptRecording}
+          onCancel={() => setRecorderOpen(false)}
+        />
       ) : null}
 
       {sheetOpen ? (
-        <div
-          className="fixed inset-0 z-50 bg-black/50"
-          onClick={() => setSheetOpen(false)}
-          role="presentation"
+        <Modal
+          label="Choose capture source"
+          onClose={() => setSheetOpen(false)}
         >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Choose capture source"
-            onClick={(event) => event.stopPropagation()}
-            className="absolute inset-x-0 bottom-0 rounded-t-2xl border border-border bg-card p-4 pb-8"
-          >
-            <p className="mb-3 text-sm font-bold">Add to your check-in</p>
-            <div className="space-y-2">
-              {SOURCES.map((source) => (
-                <button
-                  key={source.key}
-                  type="button"
-                  onClick={() => pick(source.key)}
-                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-background px-3 py-3 text-left"
-                >
-                  <source.icon
-                    className="h-5 w-5 shrink-0 text-muted-foreground"
-                    aria-hidden
-                  />
-                  <span>
-                    <span className="block text-sm font-semibold">
-                      {source.label}
-                    </span>
-                    <span className="block text-xs text-muted-foreground">
-                      {source.hint}
-                    </span>
-                  </span>
-                </button>
-              ))}
+          <p className="mb-3 text-base font-semibold">Add to your check-in</p>
+          <div className="space-y-2">
+            {SOURCES.map((source) => (
               <button
+                key={source.key}
                 type="button"
-                onClick={() => setSheetOpen(false)}
-                className="w-full rounded-xl px-3 py-2.5 text-sm font-semibold text-muted-foreground"
+                onClick={() => pick(source.key)}
+                className="flex min-h-11 w-full items-center gap-3 rounded-xl border border-border bg-background px-3 py-3 text-left"
               >
-                Cancel
+                <source.icon
+                  className="h-5 w-5 shrink-0 text-muted-foreground"
+                  aria-hidden
+                />
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold">
+                    {source.label}
+                  </span>
+                  <span className="block text-sm text-muted-foreground">
+                    {source.hint}
+                  </span>
+                </span>
               </button>
-            </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setSheetOpen(false)}
+              className="min-h-11 w-full rounded-xl px-3 text-sm font-semibold text-muted-foreground"
+            >
+              Cancel
+            </button>
           </div>
-        </div>
+        </Modal>
       ) : null}
     </div>
   );

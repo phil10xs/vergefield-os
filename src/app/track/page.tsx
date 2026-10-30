@@ -1,6 +1,8 @@
+import Link from "next/link";
 import type { Metadata } from "next";
-import { ClipboardCheck } from "lucide-react";
-import { ListHero } from "@/components/layout/list-overview";
+import { AppShell } from "@/components/layout/app-shell";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
 import { TrackList } from "@/components/track/track-list";
 import { db } from "@/db";
 import { job } from "@/db/schema";
@@ -14,18 +16,22 @@ export default async function TrackPage() {
   const jobs = await db.select().from(job).orderBy(asc(job.createdAt));
 
   return (
-    <main className="mx-auto w-full max-w-[var(--app-page-max)] px-[var(--app-gutter)] py-8">
-      <ListHero
-        title="Track"
+    <AppShell>
+      <PageHeader
+        eyebrow="Track"
+        title="Issues snag list"
         description="Every property's visits and sessions — as an Issues snag list."
-        icon={ClipboardCheck}
-        count={jobs.length}
-        countLabel={jobs.length === 1 ? "session" : "sessions"}
-        actionHref="/request"
-        actionLabel="New check-in"
+        meta={`${jobs.length} ${jobs.length === 1 ? "session" : "sessions"}`}
+        actions={
+          <Link href="/request" className="flex w-full">
+            <Button variant="accent" className="w-full">
+              New check-in
+            </Button>
+          </Link>
+        }
       />
 
       <TrackList jobs={jobs} />
-    </main>
+    </AppShell>
   );
 }

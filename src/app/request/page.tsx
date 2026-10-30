@@ -1,82 +1,198 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { BadgePercent, House, Wrench } from "lucide-react";
+import { House } from "lucide-react";
+import { brand, howItWorks } from "@/brand";
+import { BoardPreview } from "@/components/request/board-preview";
 import { Button } from "@/components/ui/button";
-import { brand } from "@/brand";
 
-export const metadata: Metadata = { title: "Check in your property" };
+export const metadata: Metadata = {
+  title: { absolute: brand.name },
+  description: brand.description,
+};
+
+const AUDIENCE = ["Landlords", "Homeowners", "Tenants"] as const;
 
 const TESTIMONIALS = [
   {
     quote:
       "Filmed the damp on Tuesday, plumber booked by Friday — and every visit stays on the board.",
-    name: "Amara O., landlord, Manchester",
+    name: "Amara O.",
+    role: "Landlord, Manchester",
   },
   {
-    quote:
-      "Snag rounds used to die in WhatsApp. Now each flat has a memory.",
-    name: "Tom W., facility manager",
+    quote: "Snag rounds used to die in WhatsApp. Now each flat has a memory.",
+    name: "Tom W.",
+    role: "Facility manager",
   },
   {
     quote:
       "No account, no app. Just a link where I watch my repair move to done.",
-    name: "Priya S., tenant",
+    name: "Priya S.",
+    role: "Tenant",
   },
 ];
 
-const HOW_IT_WORKS = [
-  {
-    title: "Check in",
-    body: "film the issues you see in 20-second clips.",
-  },
-  {
-    title: "Get your Issues snag list",
-    body: "VergeSnag AI lists every issue and its trade.",
-  },
-  {
-    title: "Track it all",
-    body: "your property's issues and bills tracker, till every fix is done.",
-  },
-];
+const frame = "mx-auto w-full max-w-7xl px-3 sm:px-5 lg:px-6";
+
+function MetaMark() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="h-5 w-5 shrink-0 text-foreground"
+    >
+      <path
+        fill="currentColor"
+        d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"
+      />
+    </svg>
+  );
+}
 
 export default function PublicRequestPage() {
   return (
-    <main className="mx-auto w-full max-w-xl px-[var(--app-gutter)] py-8">
-      <div className="mb-6">
-        <div className="mb-3 flex items-center gap-2.5">
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-            <House className="h-5 w-5" aria-hidden />
-            <Wrench
-              className="absolute -bottom-1 -right-1 h-4.5 w-4.5 rounded-full bg-[var(--gv-signal)] p-0.5 text-black"
-              aria-hidden
-            />
-          </div>
-          <span className="font-display text-lg font-bold tracking-tight">
-            {brand.name}
-          </span>
+    <div className="flex min-h-dvh flex-col bg-background text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+        <div className={`${frame} flex h-16 items-center justify-between gap-3`}>
+          <Link
+            href="/request"
+            className="flex min-h-11 min-w-0 items-center gap-2.5"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <House className="h-4 w-4" aria-hidden />
+            </span>
+            <span className="truncate font-display text-base font-semibold tracking-tight">
+              {brand.name}
+            </span>
+          </Link>
+          <Link href="/request/checkin" className="shrink-0">
+            <Button variant="accent">Check in</Button>
+          </Link>
         </div>
-        <h1 className="font-display text-[length:var(--app-title-size)] font-bold tracking-tight">
-          Landlords, Home Owners &amp; Tenants — check in your property &amp;
-          homes <span className="text-[var(--gv-teal-bright)]">for free.</span>{" "}
-          <span className="block italic">
-            Record the issues. Get your Issues snag list. Track fixes and
-            bills on us 🙂
-          </span>
-        </h1>
-        <section aria-label="Before and after VergeSnag" className="mb-6 mt-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+      </header>
+
+      <main className="flex-1">
+        <section className="px-3 pt-3 sm:px-5 sm:pt-5 lg:px-6 lg:pt-6">
+          <div className="relative isolate mx-auto flex min-h-[34rem] w-full max-w-7xl items-center overflow-hidden rounded-[1.75rem] bg-[#071617] text-[#f7faf9] shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:block sm:min-h-0">
+            <figure className="pointer-events-none absolute inset-0 sm:static">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/checkin-after.jpg"
+                alt="Cared-for house with fixed wall, tap and window"
+                className="h-full w-full object-contain object-[right_center] sm:h-auto sm:object-fill"
+              />
+              <figcaption className="sr-only">
+                The cared-for house, with the fixed wall, tap and window shown beside it
+              </figcaption>
+            </figure>
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-[linear-gradient(100deg,rgba(7,22,23,0.9)_0%,rgba(7,22,23,0.78)_26%,rgba(7,22,23,0.42)_44%,rgba(7,22,23,0.08)_58%,transparent_68%)]"
+            />
+
+            <div className="relative z-10 w-[58%] min-w-0 px-4 py-6 sm:absolute sm:inset-y-0 sm:left-0 sm:flex sm:w-[56%] sm:items-center sm:px-10 sm:py-10 lg:w-[50%] lg:px-14">
+              <div className="min-w-0">
+              <h1 className="max-w-3xl font-display text-[1.85rem] font-semibold leading-[1.08] tracking-[-0.045em] text-white sm:text-[2.35rem] lg:text-[3rem] lg:leading-[1.06] xl:text-[3.4rem]">
+                Your Property Care Re-Imagined.
+              </h1>
+              <p className="mt-4 max-w-2xl font-display text-lg font-bold leading-snug tracking-[-0.03em] text-white sm:text-xl lg:text-[1.65rem]">
+                Capture the issues. Track the bills. Once you check in your
+                property.
+              </p>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">
+                Damp walls, leaky pipes, weedy gardens on big households &amp;
+                multiple properties.
+              </p>
+              <Link
+                href="/request/checkin"
+                className="mt-6 flex w-full sm:inline-flex sm:w-auto"
+              >
+                <Button
+                  variant="accent"
+                  size="lg"
+                  className="h-14 w-full px-8 text-lg sm:w-auto"
+                >
+                  Start your check-in
+                </Button>
+              </Link>
+              <ul
+                className="mt-8 flex flex-wrap gap-2"
+                aria-label="Who VergeSnag is for"
+              >
+                {AUDIENCE.map((label) => (
+                  <li key={label}>
+                    <span className="inline-flex border border-white/25 px-3 py-2 text-xs font-semibold tracking-[0.04em] text-white/90">
+                      {label}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              </div>
+            </div>
+          </div>
+          <p className="mx-auto mt-4 flex w-full max-w-7xl items-center gap-2 text-sm font-medium text-muted-foreground sm:mt-5">
+            <MetaMark />
+            Powered by Meta
+          </p>
+        </section>
+
+        <section
+          aria-label="How it works"
+          className={`${frame} py-12 sm:py-16`}
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gv-teal-bright)]">
+            How it works
+          </p>
+          <h2 className="mt-3 max-w-2xl font-display text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+            From a short clip to a board you can follow
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+            Powered by {brand.engine}.
+          </p>
+          <BoardPreview />
+          <ol className="mt-8 grid gap-6 md:grid-cols-3">
+            {howItWorks.map((step, index) => (
+              <li key={step.title} className="min-w-0">
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                  {index + 1}
+                </span>
+                <h3 className="mt-4 font-display text-xl font-semibold tracking-tight">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                  {step.body}
+                </p>
+                {index === 0 ? (
+                  <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                    Film what you see, and {brand.engine} builds your Issues
+                    snag list and your property&apos;s Bills Tracker.
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section
+          aria-label="Before and after VergeSnag"
+          className={`${frame} pb-12 sm:pb-16`}
+        >
+          <h2 className="font-display text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+            Before and after
+          </h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
             <figure className="overflow-hidden rounded-2xl border border-border bg-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/checkin-before.jpg"
                 alt="Neglected UK house with mould, bad sink and broken window close-ups"
-                className="h-auto w-full"
+                className="aspect-[3/2] w-full object-cover"
               />
-              <figcaption className="px-4 py-3">
-                <p className="text-xs font-bold uppercase tracking-wide text-destructive">
+              <figcaption className="px-4 py-4 sm:px-5">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-destructive">
                   Before
                 </p>
-                <p className="mt-0.5 text-sm text-muted-foreground">
+                <p className="mt-2 text-base leading-relaxed text-muted-foreground">
                   Issues spotted too late, scattered across chats.
                 </p>
               </figcaption>
@@ -86,91 +202,74 @@ export default function PublicRequestPage() {
               <img
                 src="/images/checkin-after.jpg"
                 alt="Cared-for UK house with fixed wall, sink and window close-ups"
-                className="h-auto w-full"
+                className="aspect-[3/2] w-full object-cover"
               />
-              <figcaption className="px-4 py-3">
-                <p className="text-xs font-bold uppercase tracking-wide text-[var(--gv-teal-bright)]">
+              <figcaption className="px-4 py-4 sm:px-5">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--gv-teal-bright)]">
                   After
                 </p>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  Checked in, tracked and fixed with {brand.name}.
+                <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                  Checked in, tracked and fixed with {brand.shortName}.
                 </p>
               </figcaption>
             </figure>
           </div>
         </section>
-        <p className="mt-1 max-w-md text-sm text-muted-foreground">
-          We match your home fixing bills this festive period. Here&apos;s how
-          it works:
-        </p>
-        <ol className="mt-3 max-w-md space-y-2.5">
-          {HOW_IT_WORKS.map((step, index) => (
-            <li key={step.title} className="flex items-start gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                {index + 1}
-              </span>
-              <p className="text-sm">
-                <span className="font-semibold">{step.title} — </span>
-                <span className="text-muted-foreground">{step.body}</span>
+
+        <section
+          aria-label="What owners say"
+          className={`${frame} pb-12 sm:pb-16`}
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gv-teal-bright)]">
+            What owners say
+          </p>
+          <h2 className="mt-3 font-display text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+            Visits that stay on the record
+          </h2>
+          <div className="mt-10 grid gap-10 md:grid-cols-3">
+            {TESTIMONIALS.map((item) => (
+              <figure key={item.name} className="min-w-0">
+                <blockquote className="font-display text-xl font-medium leading-snug tracking-[-0.03em] sm:text-2xl">
+                  &ldquo;{item.quote}&rdquo;
+                </blockquote>
+                <figcaption className="mt-4 text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">
+                    {item.name}
+                  </span>
+                  {" · "}
+                  {item.role}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+
+        <section className="px-3 pb-[max(3rem,env(safe-area-inset-bottom))] sm:px-5 sm:pb-16 lg:px-6">
+          <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-[linear-gradient(120deg,#071617,#134e4a_55%,#1f7a72)] px-6 py-12 text-[#f7faf9] sm:px-12 sm:py-14">
+            <div className="max-w-2xl">
+              <h2 className="font-display text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+                Festive offer
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-white/75 sm:text-lg">
+                {brand.shortName} matches your bills on home fixes checked in
+                this festive season.
               </p>
-            </li>
-          ))}
-        </ol>
-        <p className="mt-3 max-w-md text-sm text-muted-foreground">
-          Powered by {brand.engine}.
-        </p>
-      </div>
-
-      <div className="mb-8 flex items-start gap-3 rounded-2xl bg-[var(--gv-signal)] p-4 text-black">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/10">
-          <BadgePercent className="h-5 w-5" aria-hidden />
-        </span>
-        <div>
-          <p className="font-display text-base font-bold tracking-tight">
-            Festive offer
-          </p>
-          <p className="mt-0.5 text-sm font-medium leading-snug">
-            {brand.shortName} matches your bills on home fixes checked
-            in this festive season.
-          </p>
-        </div>
-      </div>
-
-      <section
-        aria-label={`Start using ${brand.name}`}
-        className="mb-8 rounded-2xl bg-primary p-5 text-primary-foreground sm:p-6"
-      >
-        <h2 className="font-display text-xl font-bold tracking-tight">
-          Your property, remembered.
-        </h2>
-        <p className="mt-1 text-sm opacity-90">
-          One 20-second check-in builds your issues and bills tracker. Free
-          to try, no account needed.
-        </p>
-        <Link href="/request/checkin" className="mt-4 inline-block">
-          <Button variant="accent" className="w-full sm:w-auto">
-            Start your check-in
-          </Button>
-        </Link>
-      </section>
-
-      <section aria-label="What owners say" className="mb-8">
-        <h2 className="mb-2 font-display text-lg font-bold tracking-tight">
-          What owners say
-        </h2>
-        <div className="divide-y divide-border">
-          {TESTIMONIALS.map((item) => (
-            <figure key={item.name} className="py-3">
-              <blockquote className="text-sm leading-relaxed">
-                &ldquo;{item.quote}&rdquo;
-              </blockquote>
-              <figcaption className="mt-1 text-xs font-semibold text-muted-foreground">
-                — {item.name}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
-    </main>
+              <Link
+                href="/request/checkin"
+                className="mt-6 flex w-full sm:inline-flex sm:w-auto"
+              >
+                <Button
+                  variant="accent"
+                  size="lg"
+                  className="h-14 w-full px-8 text-lg sm:w-auto"
+                >
+                  Start your check-in
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }

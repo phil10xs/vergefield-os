@@ -43,6 +43,65 @@
   }
 }
 
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-left: max(var(--app-gutter), env(safe-area-inset-left));
+    padding-right: max(var(--app-gutter), env(safe-area-inset-right));
+  }
+
+  .text-field {
+    box-sizing: border-box;
+    height: 2.75rem;
+    width: 100%;
+    min-width: 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--input);
+    background: var(--card);
+    padding-inline: 0.75rem;
+    font-size: 1rem;
+    color: var(--foreground);
+  }
+
+  .text-field::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  .text-field:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+
+  .text-field:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .text-area {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--input);
+    background: var(--card);
+    padding: 0.625rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+
+  .text-area::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  .text-area:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -50,7 +109,7 @@
 
   html {
     max-width: 100%;
-    overflow-x: auto;
+    overflow-x: clip;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -61,6 +120,7 @@
     line-height: 1.5;
     min-width: 0;
     max-width: 100%;
+    overflow-x: clip;
     overflow-wrap: break-word;
   }
 

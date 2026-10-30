@@ -1,138 +1,84 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { House } from "lucide-react";
 import { createPublicRequestAction } from "@/app/actions/requests";
+import { brand, howItWorks } from "@/brand";
 import { CapturePicker } from "@/components/capture/capture-picker";
+import { AppShell } from "@/components/layout/app-shell";
 import { CheckinForm } from "@/components/request/checkin-form";
-import { NoteField } from "@/components/request/note-field";
 import { SubmitCheckinButton } from "@/components/request/submit-checkin-button";
-import { brand } from "@/brand";
 
 export const metadata: Metadata = { title: "New check-in" };
 
-const inputClass =
-  "h-11 w-full rounded-xl border border-input bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
-
 export default function CheckinPage() {
   return (
-    <main className="mx-auto w-full max-w-xl px-[var(--app-gutter)] py-8">
-      <div className="mb-6">
-        <div className="mb-3 flex items-center gap-2.5">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-            <House className="h-5 w-5" aria-hidden />
-          </div>
-          <span className="font-display text-lg font-bold tracking-tight">
-            {brand.name}
-          </span>
+    <AppShell showCheckIn={false}>
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] lg:gap-12 xl:gap-16">
+        <div className="min-w-0 max-w-prose">
+          <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            Your check-in
+          </h1>
+          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+            Film what you see, and {brand.engine} builds your Issues snag list
+            and your property&apos;s Bills Tracker.
+          </p>
+          <ol className="mt-6 space-y-3">
+            {howItWorks.map((step, index) => (
+              <li key={step.title} className="flex items-start gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                  {index + 1}
+                </span>
+                <p className="pt-0.5 text-sm leading-relaxed">
+                  <span className="font-semibold">{step.title}. </span>
+                  <span className="text-muted-foreground">{step.body}</span>
+                </p>
+              </li>
+            ))}
+          </ol>
         </div>
-        <h1 className="font-display text-[length:var(--app-title-size)] font-bold tracking-tight">
-          Your check-in
-        </h1>
-        <p className="mt-1 max-w-md text-sm text-muted-foreground">
-          Leave your details, film what you see, and {brand.engine} builds
-          your Issues snag list and your Home/Property&apos;s Issues &amp;
-          Bills Tracker Board.
-        </p>
-      </div>
 
-      <CheckinForm action={createPublicRequestAction}>
-        <label className="block">
-          <span className="mb-1 block text-sm font-semibold">Full name</span>
-          <input
-            name="requesterName"
-            required
-            autoComplete="name"
-            placeholder="e.g. Jordan Lee"
-            className={inputClass}
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1 block text-sm font-semibold">
-            Property address
-          </span>
-          <input
-            name="propertyAddress"
-            required
-            autoComplete="street-address"
-            placeholder="e.g. 12 Rosebank Road, Manchester"
-            className={inputClass}
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1 block text-sm font-semibold">
-            Business name{" "}
-            <span className="font-normal text-muted-foreground">
-              (optional)
-            </span>
-          </span>
-          <input
-            name="businessName"
-            autoComplete="organization"
-            placeholder="e.g. Lee Property Care"
-            className={inputClass}
-          />
-        </label>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <CheckinForm action={createPublicRequestAction}>
           <label className="block">
-            <span className="mb-1 block text-sm font-semibold">
-              Phone or email
+            <span className="mb-1.5 block text-sm font-semibold">
+              Property address
             </span>
             <input
-              name="requesterContact"
+              name="propertyAddress"
               required
-              autoComplete="tel"
-              placeholder="How should the team reach you?"
-              className={inputClass}
+              autoComplete="street-address"
+              placeholder="e.g. 12 Rosebank Road, Manchester"
+              className="text-field"
             />
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-semibold">How urgent?</span>
-            <select name="urgency" className={inputClass} defaultValue="normal">
-              <option value="normal">Normal</option>
-              <option value="urgent">Urgent</option>
+            <span className="mb-1.5 block text-sm font-semibold">
+              What trade do you need?
+            </span>
+            <select
+              name="trade"
+              className="text-field"
+              defaultValue="auto"
+              disabled
+            >
+              <option value="auto">Auto-detect from my videos</option>
             </select>
+            <span className="mt-1.5 block text-sm text-muted-foreground">
+              Manual trade picker coming soon — auto-detect is on for now.
+            </span>
           </label>
-        </div>
-        <label className="block">
-          <span className="mb-1 block text-sm font-semibold">
-            What trade do you need?
-          </span>
-          <select
-            name="trade"
-            className={`${inputClass} cursor-not-allowed opacity-70`}
-            defaultValue="auto"
-            disabled
-          >
-            <option value="auto">Auto-detect from my videos</option>
-          </select>
-          <span className="mt-1 block text-xs text-muted-foreground">
-            Manual trade picker coming soon — auto-detect is on for now.
-          </span>
-        </label>
-        <fieldset>
-          <legend className="mb-1 px-1 text-sm font-semibold">
-            Videos — film the issues
-          </legend>
-          <CapturePicker />
-        </fieldset>
-        <NoteField />
-        <div>
-          <SubmitCheckinButton />
-          <p className="mt-2 text-center text-xs text-muted-foreground">
-            {brand.engine} detects the trade and builds your report and
-            tracker.
-          </p>
-        </div>
-      </CheckinForm>
-
-      <p className="mt-4 text-center text-sm">
-        <Link
-          href="/request"
-          className="font-semibold text-link hover:underline"
-        >
-          ← Back to how it works
-        </Link>
-      </p>
-    </main>
+          <fieldset>
+            <legend className="mb-1.5 block text-sm font-semibold leading-relaxed">
+              Do a video clip for each issue. Narrate as you film
+            </legend>
+            <CapturePicker />
+          </fieldset>
+          <div>
+            <SubmitCheckinButton />
+            <p className="mt-2 text-center text-sm text-muted-foreground">
+              {brand.engine} detects the trade and builds your report and
+              tracker.
+            </p>
+          </div>
+        </CheckinForm>
+      </div>
+    </AppShell>
   );
 }

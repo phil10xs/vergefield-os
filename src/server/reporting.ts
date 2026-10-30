@@ -118,8 +118,8 @@ export async function getLatestReport(
 }
 
 export interface PublicRequestInput {
-  requesterName: string;
-  requesterContact: string;
+  requesterName?: string | null;
+  requesterContact?: string | null;
   businessName?: string | null;
   propertyAddress: string;
   priority: "low" | "medium" | "high";
@@ -140,8 +140,8 @@ export async function createPublicRequest(
       priority: input.priority,
       tradesmanTrade: null,
       source: "public",
-      requesterName: input.requesterName,
-      requesterContact: input.requesterContact,
+      requesterName: input.requesterName ?? null,
+      requesterContact: input.requesterContact ?? null,
       businessName: input.businessName ?? null,
       propertyAddress: input.propertyAddress,
       notes: input.description,

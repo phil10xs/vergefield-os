@@ -16,10 +16,10 @@ export const buttonVariants = cva(
           "bg-destructive text-destructive-foreground hover:brightness-110",
       },
       size: {
-        default: "h-11 px-5",
-        sm: "h-9 px-4 text-xs",
-        lg: "h-12 px-7 text-base",
-        icon: "h-10 w-10",
+        default: "h-11 min-h-11 px-4",
+        sm: "h-11 min-h-11 px-3.5 text-sm",
+        lg: "h-12 min-h-12 px-6 text-base",
+        icon: "h-11 w-11",
       },
     },
     defaultVariants: {
