@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { House } from "lucide-react";
 import { brand, howItWorks } from "@/brand";
+import { BrandWordmark } from "@/components/layout/brand-wordmark";
 import { BoardPreview } from "@/components/request/board-preview";
 import { Button } from "@/components/ui/button";
 
@@ -10,7 +10,11 @@ export const metadata: Metadata = {
   description: brand.description,
 };
 
-const AUDIENCE = ["Landlords", "Homeowners", "Tenants"] as const;
+const AUDIENCE = [
+  "Landlords",
+  "Homeowners",
+  "Property/Facility Managers",
+] as const;
 
 const TESTIMONIALS = [
   {
@@ -54,17 +58,7 @@ export default function PublicRequestPage() {
     <div className="flex min-h-dvh flex-col bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
         <div className={`${frame} flex h-16 items-center justify-between gap-3`}>
-          <Link
-            href="/request"
-            className="flex min-h-11 min-w-0 items-center gap-2.5"
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <House className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="truncate font-display text-base font-semibold tracking-tight">
-              {brand.name}
-            </span>
-          </Link>
+          <BrandWordmark />
           <Link href="/request/checkin" className="shrink-0">
             <Button variant="accent">Check in</Button>
           </Link>
@@ -73,13 +67,18 @@ export default function PublicRequestPage() {
 
       <main className="flex-1">
         <section className="px-3 pt-3 sm:px-5 sm:pt-5 lg:px-6 lg:pt-6">
-          <div className="relative isolate mx-auto flex min-h-[34rem] w-full max-w-7xl items-center overflow-hidden rounded-[1.75rem] bg-[#071617] text-[#f7faf9] shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:block sm:min-h-0">
-            <figure className="pointer-events-none absolute inset-0 sm:static">
+          <div className="relative isolate mx-auto grid w-full max-w-7xl overflow-hidden rounded-[1.75rem] bg-[#071617] text-[#f7faf9] shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+            {/* Keeps the photo's 3:2 frame on wider screens without capping the copy. */}
+            <div
+              aria-hidden
+              className="col-start-1 row-start-1 hidden w-full self-start aspect-[3/2] sm:block"
+            />
+            <figure className="col-start-1 row-start-2 mt-2 h-80 w-full sm:absolute sm:inset-0 sm:row-start-1 sm:mt-0 sm:h-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/checkin-after.jpg"
                 alt="Cared-for house with fixed wall, tap and window"
-                className="h-full w-full object-contain object-[right_center] sm:h-auto sm:object-fill"
+                className="h-full w-full object-cover object-center sm:object-[right_center]"
               />
               <figcaption className="sr-only">
                 The cared-for house, with the fixed wall, tap and window shown beside it
@@ -87,21 +86,21 @@ export default function PublicRequestPage() {
             </figure>
             <div
               aria-hidden
-              className="absolute inset-0 bg-[linear-gradient(100deg,rgba(7,22,23,0.9)_0%,rgba(7,22,23,0.78)_26%,rgba(7,22,23,0.42)_44%,rgba(7,22,23,0.08)_58%,transparent_68%)]"
+              className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(100deg,rgba(7,22,23,0.9)_0%,rgba(7,22,23,0.78)_26%,rgba(7,22,23,0.42)_44%,rgba(7,22,23,0.08)_58%,transparent_68%)] sm:block"
             />
 
-            <div className="relative z-10 w-[58%] min-w-0 px-4 py-6 sm:absolute sm:inset-y-0 sm:left-0 sm:flex sm:w-[56%] sm:items-center sm:px-10 sm:py-10 lg:w-[50%] lg:px-14">
+            <div className="relative z-10 col-start-1 row-start-1 w-full min-w-0 self-center px-5 py-8 sm:w-[64%] sm:px-10 sm:py-10 md:w-[56%] lg:w-[50%] lg:px-14">
               <div className="min-w-0">
-              <h1 className="max-w-3xl font-display text-[1.85rem] font-semibold leading-[1.08] tracking-[-0.045em] text-white sm:text-[2.35rem] lg:text-[3rem] lg:leading-[1.06] xl:text-[3.4rem]">
-                Your Property Care Re-Imagined.
+              <h1 className="max-w-3xl text-balance font-display text-[1.85rem] font-semibold leading-[1.08] tracking-[-0.045em] text-white md:text-[2.35rem] lg:text-[3rem] lg:leading-[1.06] xl:text-[3.4rem]">
+                The AI Caretaker for your property.
               </h1>
               <p className="mt-4 max-w-2xl font-display text-lg font-bold leading-snug tracking-[-0.03em] text-white sm:text-xl lg:text-[1.65rem]">
-                Capture the issues. Track the bills. Once you check in your
-                property.
+                Film &amp; narrate the issue. Track the bill. All from one
+                check-in.
               </p>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">
-                Damp walls, leaky pipes, weedy gardens on big households &amp;
-                multiple properties.
+                Damp walls, leaky pipes, weedy gardens — across one home or a
+                whole portfolio.
               </p>
               <Link
                 href="/request/checkin"
@@ -117,7 +116,7 @@ export default function PublicRequestPage() {
               </Link>
               <ul
                 className="mt-8 flex flex-wrap gap-2"
-                aria-label="Who VergeSnag is for"
+                aria-label="Who VergeCare is for"
               >
                 {AUDIENCE.map((label) => (
                   <li key={label}>
@@ -147,8 +146,18 @@ export default function PublicRequestPage() {
             From a short clip to a board you can follow
           </h2>
           <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-            Powered by {brand.engine}.
+            Your caretaker watches every clip and builds the board.
           </p>
+          <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-[#071617]">
+            <iframe
+              className="aspect-video w-full"
+              src="https://www.youtube-nocookie.com/embed/aHLs56BK9LY"
+              title="How VergeCare works"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              loading="lazy"
+            />
+          </div>
           <BoardPreview />
           <ol className="mt-8 grid gap-6 md:grid-cols-3">
             {howItWorks.map((step, index) => (
@@ -164,8 +173,9 @@ export default function PublicRequestPage() {
                 </p>
                 {index === 0 ? (
                   <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-                    Film what you see, and {brand.engine} builds your Issues
-                    snag list and your property&apos;s Bills Tracker.
+                    Film &amp; narrate what you see, and {brand.engine} builds
+                    your Issues snag list and your property&apos;s Bills
+                    Tracker.
                   </p>
                 ) : null}
               </li>
@@ -174,7 +184,7 @@ export default function PublicRequestPage() {
         </section>
 
         <section
-          aria-label="Before and after VergeSnag"
+          aria-label="Before and after VergeCare"
           className={`${frame} pb-12 sm:pb-16`}
         >
           <h2 className="font-display text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
@@ -217,6 +227,125 @@ export default function PublicRequestPage() {
         </section>
 
         <section
+          aria-label="What VergeCare looks after"
+          className={`${frame} pb-12 sm:pb-16`}
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gv-teal-bright)]">
+            What VergeCare looks after
+          </p>
+          <h2 className="mt-3 max-w-2xl font-display text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+            Issues and bills today. Rent, docs, and chats coming soon.
+          </h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-border bg-card px-4 py-4 sm:px-5">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--gv-teal-bright)]">
+                Live now
+              </p>
+              <ul className="mt-3 space-y-3 text-base leading-relaxed">
+                <li>
+                  <span className="font-semibold">Issues. </span>
+                  <span className="text-muted-foreground">
+                    Film a clip, get a costed snag list, track every fix to
+                    done.
+                  </span>
+                </li>
+                <li>
+                  <span className="font-semibold">Bills. </span>
+                  <span className="text-muted-foreground">
+                    Every bill tracked until it&apos;s paid.
+                  </span>
+                </li>
+                <li>
+                  <span className="font-semibold">Clips kept. </span>
+                  <span className="text-muted-foreground">
+                    Every video you upload stays with the property. Giving her
+                    a memory.
+                  </span>
+                </li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-border bg-card px-4 py-4 sm:px-5">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                Coming soon
+              </p>
+              <ul className="mt-3 space-y-3 text-base leading-relaxed">
+                <li>
+                  <span className="font-semibold">Rent. </span>
+                  <span className="text-muted-foreground">
+                    Rent due, paid, and chased — on the same board.
+                  </span>
+                </li>
+                <li>
+                  <span className="font-semibold">Docs. </span>
+                  <span className="text-muted-foreground">
+                    Certificates, contracts, and inventories — upload and keep
+                    them with the property.
+                  </span>
+                </li>
+                <li>
+                  <span className="font-semibold">Chats. </span>
+                  <span className="text-muted-foreground">
+                    Owner, tenant, and tradesman talking around the fix — not
+                    lost threads.
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section
+          aria-label="Why VergeCare"
+          className={`${frame} pb-12 sm:pb-16`}
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gv-teal-bright)]">
+            Why VergeCare
+          </p>
+          <h2 className="mt-3 max-w-2xl font-display text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+            Perfect for care across multiple homes and portfolios.
+          </h2>
+          <ul className="mt-8 max-w-2xl space-y-5 text-base leading-relaxed sm:text-lg">
+            <li>
+              <span className="font-semibold">
+                One check-in. Every issue looked after.{" "}
+              </span>
+              <span className="text-muted-foreground">
+                Film &amp; narrate every issue in a single visit; your
+                caretaker lists each one with its trade and likely cost.
+              </span>
+            </li>
+            <li>
+              <span className="font-semibold">
+                Follow every bill to paid.{" "}
+              </span>
+              <span className="text-muted-foreground">
+                Update the price on the board and watch each fix move to done.
+              </span>
+            </li>
+            <li>
+              <span className="font-semibold">
+                Bidding and clips-to-pay are next.{" "}
+              </span>
+              <span className="text-muted-foreground">
+                Name your price with tradesmen, then pay from the board.
+              </span>
+            </li>
+          </ul>
+          <Link
+            href="/request/checkin"
+            className="mt-8 flex w-full sm:inline-flex sm:w-auto"
+          >
+            <Button
+              variant="accent"
+              size="lg"
+              className="h-14 w-full px-8 text-lg sm:w-auto"
+            >
+              Start your check-in
+            </Button>
+          </Link>
+        </section>
+
+        <section
           aria-label="What owners say"
           className={`${frame} pb-12 sm:pb-16`}
         >
@@ -244,31 +373,6 @@ export default function PublicRequestPage() {
           </div>
         </section>
 
-        <section className="px-3 pb-[max(3rem,env(safe-area-inset-bottom))] sm:px-5 sm:pb-16 lg:px-6">
-          <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-[linear-gradient(120deg,#071617,#134e4a_55%,#1f7a72)] px-6 py-12 text-[#f7faf9] sm:px-12 sm:py-14">
-            <div className="max-w-2xl">
-              <h2 className="font-display text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
-                Festive offer
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-white/75 sm:text-lg">
-                {brand.shortName} matches your bills on home fixes checked in
-                this festive season.
-              </p>
-              <Link
-                href="/request/checkin"
-                className="mt-6 flex w-full sm:inline-flex sm:w-auto"
-              >
-                <Button
-                  variant="accent"
-                  size="lg"
-                  className="h-14 w-full px-8 text-lg sm:w-auto"
-                >
-                  Start your check-in
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
       </main>
     </div>
   );

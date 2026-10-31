@@ -2,13 +2,12 @@
 
 import * as React from "react";
 import { Check, CheckCircle2, Loader2 } from "lucide-react";
-import { brand } from "@/brand";
 
 const STEPS = [
   "Uploading your videos",
   "Listening to what you filmed",
   "Detecting the trade",
-  "Building your report, Issues snag list & Bills Tracker Board",
+  "Building your report, Issues snag list & Bills Tracker",
 ];
 
 const STEP_MS = 2800;
@@ -62,8 +61,8 @@ export function CheckinProgress({
           {heading}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {brand.engine} is building your Home/Property&apos;s Issues Snag
-          list &amp; Bills Tracker.
+          Your caretaker is building your property&apos;s Issues snag list
+          &amp; Bills Tracker.
         </p>
         <ol className="mt-6 space-y-3 text-left">
           {STEPS.map((label, index) => {

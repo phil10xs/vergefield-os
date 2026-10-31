@@ -62,6 +62,7 @@ export const siteMedia = pgTable("site_media", {
   transcript: text("transcript"),
   visualDescription: text("visual_description"),
   detectedTrade: text("detected_trade"),
+  regions: text("regions"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -89,12 +90,17 @@ export const jobNotes = pgTable("job_notes", {
   nextSteps: text("next_steps"),
 });
 
+// Magic-link credential. Access is this token, independent of any future password.
+// jobId is the check-in the link was requested from, not a password binding.
 export const boardToken = pgTable("board_token", {
   token: text("token").primaryKey(),
   jobId: uuid("job_id")
     .references(() => job.id, { onDelete: "cascade" })
     .notNull(),
   email: text("email").notNull(),
+  // Set when a magic-link email has been queued for this live token.
+  // Later properties reuse the token and do not send again.
+  emailedAt: timestamp("emailed_at", { withTimezone: true }),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

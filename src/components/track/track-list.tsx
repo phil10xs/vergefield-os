@@ -1,13 +1,21 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/layout/page-header";
+import { ViewBoardButton } from "@/components/request/view-board-button";
 import {
   JobPaymentBadge,
   JobStatusBadge,
 } from "@/components/ui/status-badge";
+import { isValidEmail, normalizeContact } from "@/lib/board-token";
 import { groupSessionsByPropertyVisit } from "@/lib/sessions";
+import { landlordLinksEmailed } from "@/server/board-access";
 import type { Job } from "@/db/schema";
 
-export function TrackList({ jobs }: { jobs: Job[] }) {
+export async function TrackList({ jobs }: { jobs: Job[] }) {
+  const sent = await landlordLinksEmailed(
+    jobs
+      .map((row) => row.requesterContact)
+      .filter((value): value is string => Boolean(value && isValidEmail(value))),
+  );
   const groups = groupSessionsByPropertyVisit(jobs);
 
   if (groups.length === 0) {
@@ -23,7 +31,14 @@ export function TrackList({ jobs }: { jobs: Job[] }) {
 
   return (
     <div className="space-y-6">
-      {groups.map((group) => (
+      {groups.map((group) => {
+        const sessions = group.visits.flatMap((visit) => visit.sessions);
+        const sample = sessions[0];
+        const knownEmail = sessions.find(
+          (session) =>
+            session.requesterContact && isValidEmail(session.requesterContact),
+        )?.requesterContact;
+        return (
         <section
           key={group.address}
           aria-label={group.address}
@@ -39,14 +54,19 @@ export function TrackList({ jobs }: { jobs: Job[] }) {
                 {group.sessionCount === 1 ? "session" : "sessions"}
               </p>
             </div>
-            <div className="w-full min-w-0 lg:w-80 lg:shrink-0">
-              <Link
-                href={`/board?property=${encodeURIComponent(group.address)}`}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-accent px-4 py-2 text-center text-sm font-semibold text-accent-foreground"
-              >
-                View board
-              </Link>
-            </div>
+            {sample ? (
+              <div className="w-full min-w-0 lg:w-80 lg:shrink-0">
+                <ViewBoardButton
+                  jobId={sample.id}
+                  knownEmail={knownEmail}
+                  linkAlreadySent={
+                    knownEmail
+                      ? sent.has(normalizeContact(knownEmail))
+                      : false
+                  }
+                />
+              </div>
+            ) : null}
           </div>
           {group.visits.map((visit) => (
             <div key={visit.day} className="border-b border-border/60 last:border-0">
@@ -108,7 +128,8 @@ export function TrackList({ jobs }: { jobs: Job[] }) {
             </div>
           ))}
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }

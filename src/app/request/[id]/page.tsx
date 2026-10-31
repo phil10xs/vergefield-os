@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Check, ChevronDown } from "lucide-react";
@@ -10,6 +9,7 @@ import {
   JobStatusBadge,
 } from "@/components/ui/status-badge";
 import { ReportCelebration } from "@/components/request/report-celebration";
+import { ViewBoardButton } from "@/components/request/view-board-button";
 import { REPORT_SECTIONS } from "@/lib/checklist-template";
 import {
   condenseTranscript,
@@ -28,6 +28,7 @@ import {
   getLatestReport,
   getPublicJob,
 } from "@/server/reporting";
+import { fitBoxToContain, type SamRegion } from "@/server/sam";
 import { db } from "@/db";
 import { job, siteMedia, type Job } from "@/db/schema";
 import { asc, eq, inArray } from "drizzle-orm";
@@ -36,6 +37,31 @@ export const metadata: Metadata = { title: "Visit report" };
 
 function sectionLabel(key: string): string {
   return REPORT_SECTIONS.find((section) => section.key === key)?.label ?? key;
+}
+
+function regionBoxes(raw: string | null): SamRegion[] {
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (entry): entry is SamRegion =>
+          !!entry &&
+          typeof entry === "object" &&
+          typeof (entry as SamRegion).label === "string" &&
+          ["x", "y", "w", "h", "fw", "fh"].every(
+            (key) =>
+              typeof (entry as Record<string, unknown>)[key] === "number" &&
+              Number.isFinite((entry as Record<string, unknown>)[key]),
+          ) &&
+          (entry as SamRegion).w > 0 &&
+          (entry as SamRegion).h > 0,
+      )
+      .slice(0, 3);
+  } catch {
+    return [];
+  }
 }
 
 function visitStatus(sessions: Job[]): string {
@@ -100,7 +126,7 @@ export default async function PublicTrackPage({
     } else {
       reports.set(
         session.id,
-        await generateReport(session.id, session.requesterName ?? "VergeSnag", {
+        await generateReport(session.id, session.requesterName ?? "VergeCare", {
           markSubmitted: false,
         }),
       );
@@ -174,12 +200,14 @@ export default async function PublicTrackPage({
                 {views.length === 1 ? "issue" : "issues"}
               </h2>
               <div className="mt-3">
-                <Link
-                  href={`/board?property=${encodeURIComponent(address)}`}
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-accent px-4 py-2 text-center text-sm font-semibold text-accent-foreground"
-                >
-                  View my Home/Property&apos;s Issues &amp; Bills Tracker Board
-                </Link>
+                <ViewBoardButton
+                  jobId={anchor.id}
+                  onboarding={{
+                    name: anchor.requesterName ?? "",
+                    businessName: anchor.businessName ?? "",
+                    contact: anchor.requesterContact ?? "",
+                  }}
+                />
               </div>
             </div>
             <ul className="space-y-3 px-4 py-4">
@@ -314,12 +342,34 @@ export default async function PublicTrackPage({
                       className="overflow-hidden rounded-xl border border-border bg-background"
                     >
                       {row.kind === "video" ? (
-                        <video
-                          src={`/api/media/${row.id}`}
-                          controls
-                          preload="metadata"
-                          className="aspect-video w-full bg-black"
-                        />
+                        <span className="relative block aspect-video w-full bg-black">
+                          <video
+                            src={`/api/media/${row.id}`}
+                            controls
+                            preload="metadata"
+                            className="h-full w-full"
+                          />
+                          {regionBoxes(row.regions).map((box, index) => {
+                            const rect = fitBoxToContain(box);
+                            return (
+                              <span
+                                key={index}
+                                aria-hidden
+                                className="pointer-events-none absolute rounded-md border-2 border-[#d4f34a]"
+                                style={{
+                                  left: `${rect.left * 100}%`,
+                                  top: `${rect.top * 100}%`,
+                                  width: `${rect.width * 100}%`,
+                                  height: `${rect.height * 100}%`,
+                                }}
+                              >
+                                <span className="absolute -top-6 left-0 max-w-full truncate rounded bg-[#d4f34a] px-1.5 py-0.5 text-[10px] font-bold text-[#071617]">
+                                  {box.label.slice(0, 48)}
+                                </span>
+                              </span>
+                            );
+                          })}
+                        </span>
                       ) : (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img

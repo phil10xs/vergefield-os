@@ -17,8 +17,8 @@ export default function CheckinPage() {
             Your check-in
           </h1>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-            Film what you see, and {brand.engine} builds your Issues snag list
-            and your property&apos;s Bills Tracker.
+            Film &amp; narrate what you see, and {brand.engine} builds your
+            Issues snag list and your property&apos;s Bills Tracker.
           </p>
           <ol className="mt-6 space-y-3">
             {howItWorks.map((step, index) => (
@@ -73,7 +73,7 @@ export default function CheckinPage() {
           <div>
             <SubmitCheckinButton />
             <p className="mt-2 text-center text-sm text-muted-foreground">
-              {brand.engine} detects the trade and builds your report and
+              Your caretaker detects the trade and builds your report and
               tracker.
             </p>
           </div>
