@@ -1,20 +1,25 @@
 // End-to-end flow check for the public build. Runs the real HTTP journey
 // against a running server (default http://localhost:3002):
 //
-//   check-in submit → visit report → snag list → board → move card twice
+//   check-in submit → visit report → snag list → magic-link board → moves
+//   to Paid
 //
 // then deletes the test rows it created. Needs Postgres reachable with the
-// same DATABASE_URL the server uses (read from .env.local).
+// same DATABASE_URL the server uses (read from .env.local). Email is not
+// needed: the script mints the magic-link token row directly, the same row
+// View Board would create before sending.
 //
 // Usage: pnpm test:e2e            (server already running on :3002)
 //        BASE_URL=http://localhost:3009 node scripts/e2e-check.mjs
 
 import { readFileSync, rmSync } from "node:fs";
+import { randomBytes } from "node:crypto";
 import { join } from "node:path";
 import postgres from "postgres";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3002";
 const ADDRESS = `E2E Test ${Date.now()} Lane, Manchester`;
+const EMAIL = `e2e-${Date.now()}@example.com`;
 const ROOT = new URL("..", import.meta.url).pathname;
 
 function databaseUrl() {
@@ -93,14 +98,31 @@ try {
   );
   check("report shows the address", report.text.includes(ADDRESS.slice(0, 20)));
 
-  // 3. Snag list + board show the session.
+  // 3. Snag list shows the session; mint a magic-link token for the board.
   const track = await get("/track");
   check(
     "track shows the session",
     track.status === 200 && track.text.includes(ADDRESS.slice(0, 20)),
     `HTTP ${track.status}`,
   );
-  const boardPath = `/board?property=${encodeURIComponent(ADDRESS)}`;
+  const [testJob] = await sql`
+    SELECT id, status FROM job WHERE property_address = ${ADDRESS}
+    ORDER BY created_at LIMIT 1
+  `;
+  if (!testJob) throw new Error("test job row not found");
+  await sql`UPDATE job SET requester_contact = ${EMAIL} WHERE id = ${testJob.id}`;
+  const token = randomBytes(24).toString("base64url");
+  await sql`INSERT INTO board_token (token, job_id, email, expires_at)
+    VALUES (${token}, ${testJob.id}, ${EMAIL}, NOW() + INTERVAL '7 days')`;
+  const key = Buffer.from(ADDRESS, "utf8").toString("base64url");
+  const boardPath = `/b/${encodeURIComponent(token)}/p/${encodeURIComponent(key)}/board`;
+
+  const props = await get(`/b/${encodeURIComponent(token)}`);
+  check(
+    "magic link lists the property",
+    props.status === 200 && props.text.includes(ADDRESS.slice(0, 20)),
+    `HTTP ${props.status}`,
+  );
   const board = await get(boardPath);
   check(
     "board shows the card as Requested",
@@ -111,42 +133,44 @@ try {
     `HTTP ${board.status}`,
   );
 
-  // 4. Move the card along twice: Requested → In progress → Completed.
+  // 4. Move the card along: Requested → In progress → Completed → Paid.
   const boardAction = actionId(board.text);
-  const [testJob] = await sql`
-    SELECT id, status FROM job WHERE property_address = ${ADDRESS}
-    ORDER BY created_at LIMIT 1
-  `;
-  if (!testJob) throw new Error("test job row not found");
-  await postForm(
-    boardPath,
-    { jobId: testJob.id, direction: "next", property: ADDRESS },
-    boardAction,
-  );
-  const [moved] = await sql`SELECT status FROM job WHERE id = ${testJob.id}`;
-  check("card moves to In progress", moved.status === "in_progress", moved.status);
-  const done = await postForm(
-    boardPath,
-    { jobId: testJob.id, direction: "next", property: ADDRESS },
-    boardAction,
-  );
-  const [finished] = await sql`SELECT status FROM job WHERE id = ${testJob.id}`;
-  check("card moves to Completed", finished.status === "completed", finished.status);
+  const move = (direction) =>
+    postForm(
+      boardPath,
+      { token, propertyKey: key, jobId: testJob.id, direction },
+      boardAction,
+    );
+  const jobStatus = async () =>
+    (await sql`SELECT status FROM job WHERE id = ${testJob.id}`)[0].status;
+  await move("next");
+  check("card moves to In progress", (await jobStatus()) === "in_progress");
+  const done = await move("next");
+  check("card moves to Completed", (await jobStatus()) === "completed");
   check(
     "completed move celebrates",
     (done.status === 303 && !!done.location?.includes("celebrate=1")) ||
       done.status === 200,
     `HTTP ${done.status}`,
   );
+  const paid = await move("next");
+  check("card moves to Paid", (await jobStatus()) === "paid");
+  check(
+    "paid move celebrates",
+    (paid.status === 303 && !!paid.location?.includes("celebrate=paid")) ||
+      paid.status === 200,
+    `HTTP ${paid.status}`,
+  );
 
   console.log("e2e: all checks passed");
 } finally {
-  // Cleanup: remove test rows (media/reports cascade) and upload folders.
+  // Cleanup: remove test rows (media/reports/tokens cascade) and upload folders.
   const rows = await sql`SELECT id FROM job WHERE property_address = ${ADDRESS}`;
   for (const row of rows) {
     rmSync(join(ROOT, "uploads", row.id), { recursive: true, force: true });
   }
   await sql`DELETE FROM job WHERE property_address = ${ADDRESS}`;
+  await sql`DELETE FROM board_token WHERE email = ${EMAIL}`;
   console.log(`e2e: cleaned up ${rows.length} test job(s)`);
   await sql.end();
 }

@@ -1,11 +1,11 @@
-# VergeSnag (Beta)
+# VergeCare (Beta)
 
-Property check-ins for the Meta AI Global Hackathon (indie track),
-powered by the VergeSnag AI engine. Check in on your property, get an
-organized snag list & tracker board in under a minute — every visit
-remembered forever.
+Property check-ins for the Meta AI Global Hackathon (indie track).
+VergeCare is an AI caretaker for your property: check in, get an
+organized Issues snag list and Issues & Bills Tracker Board in under a
+minute — every visit remembered.
 
-Standalone project with its own VergeSnag brand tokens, button
+Standalone project with its own VergeCare brand mark, button
 variants, status badges, page header, and list hero.
 
 ## Stack
@@ -39,6 +39,8 @@ pnpm dev
 ```
 
 Open [http://localhost:3002](http://localhost:3002) in a browser.
+Full walkthrough (env keys, seed contents, click path) is in
+[instruction.md](./instruction.md).
 
 ## Checks
 
@@ -53,39 +55,45 @@ Open [http://localhost:3002](http://localhost:3002) in a browser.
 ```
 src/app            Routes: / (→ /request), /request (check-in landing),
                    /request/checkin (film + submit), /request/[id] (visit report),
-                   /track (Issues snag list), /board (read-only Issues & Bill
-                   Tracker board), /b/[token] (placeholder), /api/health, /api/media
-src/components     VergeSnag UI: button, status badges, page header, app shell
-src/lib            Trade inference, report sections, session grouping
-src/server         Reporting and media storage logic
-src/db             Drizzle client + schema (job, site_report, site_media, …)
+                   /track (Issues snag list + board views), /b/[token] (magic-link
+                   properties, snag list and board), /api/health, /api/media
+src/components     VergeCare UI: brand mark, button, status badges, page header,
+                   app shell, board, capture
+src/lib            Trade inference, board flow, payments, report sections,
+                   session grouping
+src/server         Reporting, media storage, board access, email, SAM grounding
+src/db             Drizzle client + schema (job, site_report, site_media,
+                   board_token, …)
 src/styles         Brand tokens (colours)
 scripts/seed.ts    Demo seed data (loads scripts/demo-fixture.json)
 ```
 
 ## Check-in flow
 
-Check in → Visit report → Track. Landlords, owners and tenants check in a
-property from `/request`: address, then one video per issue (up to 20 seconds
-each) narrating what they see — a video is enough to submit. Each video
+Check in → Visit report → Track → Board. Landlords, owners, managers and
+tenants check in a property from `/request`: address, then one video per
+issue narrating what they see — a video is enough to submit. Each video
 becomes a session — trade auto-detected, reference issued — grouped under
 its visit on the visit report (`/request/[id]`), with an Issues snag list
 and a Meta Spark analysis block. `/track` holds every property's Issues snag
-list; from the report, "View my Issues & Bills Tracker Board" opens the
-property's read-only board at `/board`. Uploads stay on this machine under
-`uploads/`.
+list; from the report, "View Board" opens the property's magic-link
+Issues & Bills Tracker Board — no account, no password. Move cards
+Requested → In progress → Completed → Paid; recording an amount marks the
+bill. Uploads stay on this machine under `uploads/`.
 
 Every screen is mobile-first and adaptive across phone, tablet, and laptop:
-single-column forms, 44px touch targets, camera capture on phones degrading
-to pickers on desktop, and a horizontally scrolling board on narrow screens.
+single-column forms, 44px touch targets, native camera capture on phones
+degrading to pickers on desktop, and a horizontally scrolling board on
+narrow screens.
 
-## Meta video understanding (Step 4)
+## Meta video understanding
 
-Each uploaded video gets two Meta (Muse Spark 1.2) passes: first video
-understanding returns a speech transcript, a visual description, and the
-trade; then a text-only triage pass grades severity (low/medium/high) and a
-rough UK cost band. Either pass can fail silently — the deterministic engine
-still titles and files every session.
+Each uploaded video gets two Meta (Muse Spark) passes: first video
+understanding returns a speech transcript, a visual description, the trade,
+and the object in frame; then a text-only triage pass grades severity
+(low/medium/high) and a rough UK cost band. SAM 3.1 grounds the named
+object to regions on a still frame. Either pass can fail silently — the
+deterministic engine still titles and files every session.
 
 Setup: add your Meta Model API key to `.env.local`:
 
@@ -98,20 +106,25 @@ transcripts show as unavailable and the team uses the note plus the video's
 own voice. Duration (20 s) and the one-video rule are enforced in the browser
 before submit, with a server-side one-video backstop.
 
-## Public repo vs internal build
+## Magic-link email (optional)
+
+With SES configured (`SES_FROM_EMAIL` + AWS credentials in `.env.local`),
+View Board emails the landlord link and opens the board. Without it, the UI
+says nothing was sent and still opens the board on-screen — the demo never
+needs email.
+
+## Public repo vs private build
 
 This branch is the public source-available build. What differs from the
 private full build:
 
-- `src/app/b/[token]/page.tsx` — magic-link board placeholder (full
-  email-link board lives in the private repo only).
-- `src/server/analyze-video.ts` — the Meta Spark prompt (mock prompt here).
-- Removed outright: interactive kanban (`TrackBoard`), email board links
-  (`board-access`, `board-mail`, `BoardLinkRequest`), and the old trade
-  dashboard.
+- Deploy stack lives in the private repo only: production Dockerfile,
+  Caddy, `deploy/` configs and scripts, AWS runbooks, Vercel project.
+- Demo media (cinematic cut, thumbnail) is not in git.
 
-Everything else — check-in, visit reports, Issues snag list, read-only
-Issues & Bills Tracker Board — runs fully from this branch.
+Everything user-facing — check-in, visit reports, Issues snag list,
+magic-link Issues & Bills Tracker Board through Paid, payments, SAM
+grounding — runs fully from this branch.
 
 ## Secrets rule
 
@@ -134,8 +147,8 @@ pnpm dev       # http://localhost:3002
 2. Visit report at `/request/[id]` — sessions, Issues snag list, Meta Spark
    analysis.
 3. Snag list at `/track` — every property's visits and sessions.
-4. Issues & Bills Tracker Board from the report — the property's read-only
-   board; tap › to move a card to Completed.
+4. View Board from the report — the property's Issues & Bills Tracker
+   Board; move a card through to Paid with Pay now.
 
 ## Pre-submit test
 
@@ -144,13 +157,20 @@ Automated first (server must be running):
 ```bash
 pnpm dev              # in one terminal → http://localhost:3002
 pnpm test:e2e         # in another: submits a check-in, walks report →
-                      # snag list → board, moves a card to Completed, cleans up
+                      # snag list → magic-link board, moves a card to Paid,
+                      # cleans up
 pnpm test             # unit tests
 pnpm check:secrets    # must pass before every push
 ```
 
 Then click through once in the browser (desktop + phone width): land →
-check in with a real clip → confetti report → snag list → board move to
-Completed with confetti. If the server ever stops responding, restart
+check in with a real clip → confetti report → snag list → View Board →
+moves to Paid with confetti. If the server ever stops responding, restart
 `pnpm dev` (a huge raw gallery upload can wedge it — the in-app recorder
 keeps clips small).
+
+## License
+
+Source-available under the Business Source License 1.1, © GoVerge Ltd —
+see [LICENSE](./LICENSE). Any public use or redistribution must credit
+"VergeCare by GoVerge Ltd" with a link to this repo.

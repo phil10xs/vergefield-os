@@ -1,10 +1,17 @@
 Business Source License 1.1
 
 Licensor:             GoVerge Ltd, UK
-Licensed Work:        VergeField OS (this repository, all versions)
+Licensed Work:        VergeCare / VergeField OS (this repository, all versions)
 Additional Use Grant: None
 Change Date:          2030-10-29
 Change License:       Apache License, Version 2.0
+
+Attribution term: any public use, reuse, or redistribution of the
+Licensed Work must credit "VergeCare by GoVerge Ltd" with a link to
+https://github.com/phil10xs/vergefield-os where people will see it.
+Removing or obscuring that credit terminates your rights under this
+License. In plain words: run it, judge it, learn from it — but say
+where it came from.
 
 For information about alternative (including commercial) licensing
 arrangements for the Work, please contact the Licensor via:
