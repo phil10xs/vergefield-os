@@ -53,3 +53,22 @@ export function isRecordingSupported(): boolean {
     typeof window.MediaRecorder !== "undefined"
   );
 }
+
+export interface CaptureDevice {
+  userAgent: string;
+  maxTouchPoints: number;
+  coarsePointer: boolean;
+}
+
+/**
+ * True where tapping the capture input opens the full native camera, so the
+ * cramped in-browser recorder is skipped: phones, tablets, and other
+ * coarse-pointer touch devices. Touch laptops keep the in-browser recorder.
+ */
+export function shouldUseNativeCapture(device: CaptureDevice): boolean {
+  const ua = device.userAgent ?? "";
+  if (/android|iphone|ipod|mobile/i.test(ua)) return true;
+  if (/ipad/i.test(ua)) return true;
+  if (/macintosh/i.test(ua) && device.maxTouchPoints > 1) return true;
+  return device.coarsePointer && device.maxTouchPoints > 0;
+}

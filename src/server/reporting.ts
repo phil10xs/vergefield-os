@@ -229,26 +229,6 @@ export async function setJobStatus(jobId: string, status: string): Promise<void>
     .where(eq(job.id, jobId));
 }
 
-const BOARD_FLOW = ["requested", "in_progress", "completed", "paid"] as const;
-
-export async function stepJobStatus(
-  jobId: string,
-  direction: "next" | "prev",
-): Promise<string> {
-  const [row] = await db.select().from(job).where(eq(job.id, jobId));
-  if (!row) throw new Error("Job not found");
-  const at = (BOARD_FLOW as readonly string[]).indexOf(row.status);
-  if (at === -1) {
-    await setJobStatus(jobId, "requested");
-    return "requested";
-  }
-  const next = at + (direction === "next" ? 1 : -1);
-  if (next < 0 || next >= BOARD_FLOW.length) return row.status;
-  const status = BOARD_FLOW[next]!;
-  await setJobStatus(jobId, status);
-  return status;
-}
-
 export async function markPaid(jobId: string): Promise<void> {
   const [row] = await db.select().from(job).where(eq(job.id, jobId));
   if (!row) throw new Error("Job not found");
@@ -297,6 +277,24 @@ export async function markPaymentDue(
       paymentStatus: "due",
       updatedAt: new Date(),
     })
+    .where(eq(job.id, jobId));
+}
+
+/** Updates the price without touching the payment status. */
+export async function setPaymentAmount(
+  jobId: string,
+  amountPence: number,
+): Promise<void> {
+  if (
+    !Number.isInteger(amountPence) ||
+    amountPence <= 0 ||
+    amountPence > 10000000
+  ) {
+    throw new Error("Enter a valid amount");
+  }
+  await db
+    .update(job)
+    .set({ paymentAmount: amountPence, updatedAt: new Date() })
     .where(eq(job.id, jobId));
 }
 

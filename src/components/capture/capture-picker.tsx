@@ -6,7 +6,7 @@ import { Modal } from "@/components/ui/modal";
 import { durationOf } from "./media-upload-fields";
 import { VideoRecorder } from "./video-recorder";
 import { checkMediaSelection } from "@/lib/media-rules";
-import { isRecordingSupported } from "@/lib/recorder";
+import { isRecordingSupported, shouldUseNativeCapture } from "@/lib/recorder";
 
 type Source = "video" | "gallery";
 
@@ -16,6 +16,61 @@ interface Preview {
   name: string;
   source: Source;
   index: number;
+}
+
+function eventPromise(
+  target: HTMLElement,
+  name: string,
+  timeoutMs: number,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      target.removeEventListener(name, done);
+      reject(new Error("timeout"));
+    }, timeoutMs);
+    function done() {
+      window.clearTimeout(timer);
+      target.removeEventListener(name, done);
+      resolve();
+    }
+    target.addEventListener(name, done);
+  });
+}
+
+/**
+ * Grab one still near the start of a clip for SAM issue grounding. Silent
+ * enrichment: failures resolve null and the check-in proceeds without boxes.
+ */
+async function captureFrame(file: File): Promise<Blob | null> {
+  const url = URL.createObjectURL(file);
+  try {
+    const video = document.createElement("video");
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    video.src = url;
+    await eventPromise(video, "loadeddata", 5000);
+    const duration = Number.isFinite(video.duration) ? video.duration : 0;
+    video.currentTime = duration > 1 ? duration * 0.25 : 0.1;
+    await eventPromise(video, "seeked", 5000);
+    const width = video.videoWidth || 0;
+    const height = video.videoHeight || 0;
+    if (!width || !height) return null;
+    const scale = Math.min(1, 768 / Math.max(width, height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    const context = canvas.getContext("2d");
+    if (!context) return null;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return await new Promise((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.75),
+    );
+  } catch {
+    return null;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
 
 const SOURCES: {
@@ -43,9 +98,26 @@ export function CapturePicker() {
   const [recorderOpen, setRecorderOpen] = React.useState(false);
   const [previews, setPreviews] = React.useState<Preview[]>([]);
   const [error, setError] = React.useState<string | null>(null);
+  // Detected after mount so server and first client render agree.
+  const [nativeCapture, setNativeCapture] = React.useState(false);
+
+  React.useEffect(() => {
+    const coarse =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(pointer: coarse)").matches;
+    setNativeCapture(
+      shouldUseNativeCapture({
+        userAgent: navigator.userAgent ?? "",
+        maxTouchPoints: navigator.maxTouchPoints ?? 0,
+        coarsePointer: coarse,
+      }),
+    );
+  }, []);
   const videoRef = React.useRef<HTMLInputElement>(null);
   const galleryRef = React.useRef<HTMLInputElement>(null);
+  const framesRef = React.useRef<HTMLInputElement>(null);
   const urlsRef = React.useRef<string[]>([]);
+  const captureRun = React.useRef(0);
 
   React.useEffect(() => {
     const urls = urlsRef.current;
@@ -95,6 +167,26 @@ export function CapturePicker() {
     for (const { el } of inputList()) {
       el?.setCustomValidity(message && el.files?.length ? message : "");
     }
+    void captureFrames(files.filter((entry) => entry.kind === "video"));
+  }
+
+  /** Still per video, index-aligned, for SAM grounding. Invisible by design. */
+  async function captureFrames(entries: { file: File }[]) {
+    const run = (captureRun.current += 1);
+    const transfer = new DataTransfer();
+    for (const [index, entry] of entries.entries()) {
+      const blob = await captureFrame(entry.file);
+      if (run !== captureRun.current) return;
+      if (blob) {
+        transfer.items.add(
+          new File([blob], `sam-frame-${index}.jpg`, {
+            type: "image/jpeg",
+          }),
+        );
+      }
+    }
+    if (run !== captureRun.current) return;
+    if (framesRef.current) framesRef.current.files = transfer.files;
   }
 
   function removePreview(preview: Preview) {
@@ -114,7 +206,7 @@ export function CapturePicker() {
 
   function pick(source: Source) {
     setSheetOpen(false);
-    if (source === "video" && isRecordingSupported()) {
+    if (source === "video" && !nativeCapture && isRecordingSupported()) {
       setRecorderOpen(true);
       return;
     }
@@ -155,6 +247,16 @@ export function CapturePicker() {
         tabIndex={-1}
         aria-hidden
         onChange={() => void sync()}
+        className="sr-only"
+      />
+      <input
+        ref={framesRef}
+        type="file"
+        name="frames"
+        accept="image/jpeg"
+        multiple
+        tabIndex={-1}
+        aria-hidden
         className="sr-only"
       />
 
@@ -247,7 +349,9 @@ export function CapturePicker() {
                     {source.label}
                   </span>
                   <span className="block text-sm text-muted-foreground">
-                    {source.hint}
+                    {source.key === "video" && nativeCapture
+                      ? "Opens your camera · 20 seconds max"
+                      : source.hint}
                   </span>
                 </span>
               </button>

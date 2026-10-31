@@ -45,6 +45,7 @@ describe("analyzeVideo", () => {
         transcript: "blinds leave a gap",
         description: "Vertical blinds over a large window.",
         trade: "joiner",
+        object: "blinds",
       }),
     );
     await expect(
@@ -53,6 +54,7 @@ describe("analyzeVideo", () => {
       transcript: "blinds leave a gap",
       description: "Vertical blinds over a large window.",
       trade: "Joiner",
+      object: "blinds",
     });
   });
 
@@ -70,6 +72,7 @@ describe("analyzeVideo", () => {
       transcript: "hello",
       description: "A room.",
       trade: null,
+      object: null,
     });
   });
 
@@ -81,6 +84,7 @@ describe("analyzeVideo", () => {
       transcript: "",
       description: "just some words",
       trade: null,
+      object: null,
     });
   });
 
@@ -99,7 +103,22 @@ describe("analyzeVideo", () => {
       transcript: "tap leaks",
       description: "dripping tap",
       trade: "Plumber",
+      object: null,
     });
+  });
+
+  it("nulls a malformed object name", async () => {
+    mockAnalysis(
+      JSON.stringify({
+        transcript: "x",
+        description: "y",
+        trade: "Plumber",
+        object: "TAP!!! leaking badly???",
+      }),
+    );
+    await expect(
+      analyzeVideo(Buffer.from("clip"), "video/mp4"),
+    ).resolves.toMatchObject({ object: null });
   });
 });
 
