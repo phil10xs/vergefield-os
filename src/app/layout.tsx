@@ -26,6 +26,13 @@ export const metadata: Metadata = {
     template: `%s · ${brand.name}`,
   },
   description: brand.description,
+  icons: {
+    icon: [
+      { url: "/brand/vergecare-mark.svg", type: "image/svg+xml" },
+      { url: "/brand/vergecare-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180" }],
+  },
 };
 
 export const viewport: Viewport = {

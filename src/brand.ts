@@ -1,10 +1,10 @@
 export const brand = {
-  name: "VergeSnag (Beta)",
-  shortName: "VergeSnag",
-  engine: "VergeSnag AI",
-  tagline: "Check in. Issues snag list & Issues & Bills Tracker Board in under a minute.",
+  name: "VergeCare (Beta)",
+  shortName: "VergeCare",
+  engine: "your caretaker",
+  tagline: "Property care, remembered.",
   description:
-    "Check in on your property via VergeSnag, get an organized Issues snag list & Issues & Bills Tracker Board in under a minute — every visit remembered forever.",
+    "VergeCare is an AI caretaker for your property: film issues, track bills, every visit remembered.",
 } as const;
 
 export const howItWorks = [
@@ -14,7 +14,7 @@ export const howItWorks = [
   },
   {
     title: "Get your Issues snag list",
-    body: "VergeSnag AI lists every issue and its trade.",
+    body: "Your caretaker lists every issue and its trade.",
   },
   {
     title: "Track it all",

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="VergeCare">
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="#071617"/>
+  <path d="M32 11 13.5 27.5h5.5v21.5h11.5V38.5h7v10.5H49V27.5h5.5Z" fill="#d4f34a"/>
+  <g stroke="#071617" fill="none">
+    <line x1="27.5" y1="46.5" x2="35.5" y2="38.5" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M40.1 30.4A6 6 0 1 0 43.6 38.1" stroke-width="4.5"/>
+  </g>
+</svg>
